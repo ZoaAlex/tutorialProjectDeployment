@@ -1,0 +1,591 @@
+<app-sidebar></app-sidebar>
+
+<div class="main-content">
+  <app-navbar pageTitle="Gestion Académique"></app-navbar>
+
+  <div class="card mb-4 mt-4">
+    <div class="card-body p-0">
+      <ul class="nav nav-tabs nav-justified">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'cours'" (click)="activeTab.set('cours')">Cours</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'classes'" (click)="activeTab.set('classes')">Classes</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'ecoles'" (click)="activeTab.set('ecoles')">Écoles</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'ues'" (click)="activeTab.set('ues')">UEs</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'filieres'" (click)="activeTab.set('filieres')">Filières</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'etudiants'" (click)="activeTab.set('etudiants')">Étudiants</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'groupes'" (click)="activeTab.set('groupes')">Groupes</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section Cours -->
+  @if (activeTab() === 'cours') {
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-5">
+          <input type="text" class="form-control" placeholder="Rechercher par nom de cours..."
+            [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+        </div>
+        <div class="col-md-7 text-end d-flex justify-content-end gap-2">
+          <app-import-excel entityType="cours" (imported)="loadAll()"></app-import-excel>
+          <button class="btn btn-primary" (click)="openModal()">
+            <i class="fas fa-plus me-2"></i>Nouveau Cours
+          </button>
+        </div>
+      </div>
+      <!-- Guide colonnes Excel -->
+      <div class="mt-2">
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Format Excel cours : <code>nom | statut (ACTIF/SUSPENDU…) | codeClasse | codeUE | volumeHoraire | nbHeuresFaites | enseignantId</code>
+        </small>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nom du cours</th>
+              <th>UE</th>
+              <th>Classe</th>
+              <th>Volume Horaire</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of filteredCours(); track c.r1.id) {
+            <tr>
+              <td><strong>{{ c.r1.nom }}</strong></td>
+              <td>{{ c.r2.intitule !== 'Inconnu' ? c.r2.codeUe + ' - ' + c.r2.intitule : 'N/A' }}</td>
+              <td><span class="badge bg-secondary">{{ c.r1.codeClasse || 'N/A' }}</span></td>
+              <td>{{ c.r1.volumeHoraire }}h</td>
+              <td><span class="badge bg-info">{{ c.r1.statutCours }}</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-2" (click)="openModal(c.r1)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteCours(c.r1.id!)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Section Classes -->
+  @if (activeTab() === 'classes') {
+  <div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Format Excel classes : <code>nom | code | effectif | (ignoré) | codeFiliere</code>
+        </small>
+      </div>
+      <div class="d-flex gap-2">
+        <app-import-excel entityType="classes" (imported)="loadAll()"></app-import-excel>
+        <button class="btn btn-primary" (click)="openModalEntity('classe')">
+          <i class="fas fa-plus me-2"></i>Nouvelle Classe
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Code</th>
+            <th>Filière</th>
+            <th>Effectif</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cl of filteredClasses(); track cl.r1.id) {
+          <tr>
+            <td>{{ cl.r1.nom }}</td>
+            <td>{{ cl.r1.code }}</td>
+            <td>{{ cl.r2.nom }}</td>
+            <td>{{ cl.r1.effectif }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="openModalEntity('classe', cl.r1)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteClasse(cl.r1.id!)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- Section Écoles -->
+  @if (activeTab() === 'ecoles') {
+  <div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Format Excel écoles : <code>code | nom | description</code>
+        </small>
+      </div>
+      <div class="d-flex gap-2">
+        <app-import-excel entityType="ecoles" (imported)="loadAll()"></app-import-excel>
+        <button class="btn btn-primary" (click)="openModalEntity('ecole')">
+          <i class="fas fa-plus me-2"></i>Nouvelle École
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    @for (e of ecoles(); track e.id) {
+    <div class="col-md-4 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title mb-0">{{ e.nom }}</h5>
+            <div>
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="openModalEntity('ecole', e)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteEcole(e.id!)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <p class="card-text text-muted">{{ e.code }}</p>
+          @if (e.description) {
+            <p class="card-text small">{{ e.description }}</p>
+          }
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Section UEs -->
+  @if (activeTab() === 'ues') {
+  <div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Format Excel UE : <code>codeUE | intitulé | codeClasse</code>
+        </small>
+      </div>
+      <div class="d-flex gap-2">
+        <app-import-excel entityType="ue" (imported)="loadAll()"></app-import-excel>
+        <button class="btn btn-primary" (click)="openModalEntity('ue')">
+          <i class="fas fa-plus me-2"></i>Nouvelle UE
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Intitulé</th>
+            <th>Classe</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of ues(); track u.id) {
+          <tr>
+            <td>{{ u.codeUe }}</td>
+            <td>{{ u.intitule }}</td>
+            <td>{{ getClasseNom(u.classeId) }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="openModalEntity('ue', u)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteUe(u.id!)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- Section Filières -->
+  @if (activeTab() === 'filieres') {
+  <div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Format Excel filières : <code>code | nom | codeEcole</code>
+        </small>
+      </div>
+      <div class="d-flex gap-2">
+        <app-import-excel entityType="filieres" (imported)="loadAll()"></app-import-excel>
+        <button class="btn btn-primary" (click)="openModalEntity('filiere')">
+          <i class="fas fa-plus me-2"></i>Nouvelle Filière
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Nom</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of filieres(); track f.id) {
+          <tr>
+            <td>{{ f.code }}</td>
+            <td>{{ f.nom }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="openModalEntity('filiere', f)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteFiliere(f.id!)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- Section Étudiants -->
+  @if (activeTab() === 'etudiants') {
+  <div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Format Excel étudiants : <code>matricule | nom | prénom | sexe (M/F) | codeClasse</code>
+        </small>
+      </div>
+      <app-import-excel entityType="etudiant" (imported)="loadAll()"></app-import-excel>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Sexe</th>
+            <th>Classe</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of etudiants(); track e.id) {
+          <tr>
+            <td><code>{{ e.matricule }}</code></td>
+            <td>{{ e.nom }}</td>
+            <td>{{ e.prenom }}</td>
+            <td>{{ e.sex }}</td>
+            <td>{{ getClasseNom(e.classeId) }}</td>
+          </tr>
+          }
+          @if (etudiants().length === 0) {
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              <i class="fas fa-users fa-2x mb-2 d-block"></i>
+              Aucun étudiant. Importez un fichier Excel pour commencer.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- Section Groupes -->
+  @if (activeTab() === 'groupes') {
+  <div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Format Excel groupes : <code>nom | description | effectif | codesClasses (séparés par virgule)</code>
+        </small>
+      </div>
+      <app-import-excel entityType="groupe" (imported)="loadAll()"></app-import-excel>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Effectif</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (g of groupes(); track g.id) {
+          <tr>
+            <td><strong>{{ g.nom }}</strong></td>
+            <td>{{ g.description }}</td>
+            <td>{{ g.effectif }}</td>
+          </tr>
+          }
+          @if (groupes().length === 0) {
+          <tr>
+            <td colspan="3" class="text-center text-muted py-4">
+              <i class="fas fa-layer-group fa-2x mb-2 d-block"></i>
+              Aucun groupe. Importez un fichier Excel pour commencer.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+</div>
+
+<!-- Modal Cours -->
+@if (showModal()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouveau' }} cours</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Intitulé du cours</label>
+            <input type="text" class="form-control" [(ngModel)]="currentCours().nom">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Statut</label>
+            <select class="form-select" [(ngModel)]="currentCours().statutCours">
+              <option value="ACTIF">ACTIF</option>
+              <option value="SUSPENDU">SUSPENDU</option>
+              <option value="ANNULE">ANNULE</option>
+              <option value="REPORTE">REPORTE</option>
+              <option value="TERMINE">TERMINE</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">UE</label>
+            <select class="form-select" [(ngModel)]="currentCours().ueId">
+              <option [value]="0">Choisir une UE</option>
+              @for (u of ues(); track u.id) {
+              <option [value]="u.id">{{ u.intitule }} ({{ u.codeUe }})</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Volume Horaire</label>
+            <input type="number" class="form-control" [(ngModel)]="currentCours().volumeHoraire">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Heures effectuées</label>
+            <input type="number" class="form-control" [(ngModel)]="currentCours().nbreheurefait">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">ID Enseignant</label>
+            <input type="number" class="form-control" [(ngModel)]="currentCours().enseignantId">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveCours()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Classe -->
+@if (showModalClasse()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouvelle' }} classe</h5>
+        <button type="button" class="btn-close" (click)="closeModalEntity('classe')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nom</label>
+          <input type="text" class="form-control" [(ngModel)]="currentClasse().nom">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Code</label>
+          <input type="text" class="form-control" [(ngModel)]="currentClasse().code">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Effectif</label>
+          <input type="number" class="form-control" [(ngModel)]="currentClasse().effectif">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Filière</label>
+          <select class="form-select" [(ngModel)]="currentClasse().filiereId">
+            @for (f of filieres(); track f.id) {
+            <option [value]="f.id">{{ f.nom }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModalEntity('classe')">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveClasse()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal École -->
+@if (showModalEcole()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouvelle' }} école</h5>
+        <button type="button" class="btn-close" (click)="closeModalEntity('ecole')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nom</label>
+          <input type="text" class="form-control" [(ngModel)]="currentEcole().nom">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Code</label>
+          <input type="text" class="form-control" [(ngModel)]="currentEcole().code">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" [(ngModel)]="currentEcole().description"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModalEntity('ecole')">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveEcole()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal UE -->
+@if (showModalUe()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouvelle' }} UE</h5>
+        <button type="button" class="btn-close" (click)="closeModalEntity('ue')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Code UE</label>
+          <input type="text" class="form-control" [(ngModel)]="currentUe().codeUe">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Intitulé</label>
+          <input type="text" class="form-control" [(ngModel)]="currentUe().intitule">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Classe</label>
+          <select class="form-select" [(ngModel)]="currentUe().classeId">
+            <option [value]="0">Choisir une classe</option>
+            @for (cl of classes(); track cl.id) {
+            <option [value]="cl.id">{{ cl.nom }} ({{ cl.code }})</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModalEntity('ue')">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveUe()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Filière -->
+@if (showModalFiliere()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouvelle' }} filière</h5>
+        <button type="button" class="btn-close" (click)="closeModalEntity('filiere')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nom</label>
+          <input type="text" class="form-control" [(ngModel)]="currentFiliere().nom">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Code</label>
+          <input type="text" class="form-control" [(ngModel)]="currentFiliere().code">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">École</label>
+          <select class="form-select" [(ngModel)]="currentFiliere().ecoleId">
+            @for (e of ecoles(); track e.id) {
+            <option [value]="e.id">{{ e.nom }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModalEntity('filiere')">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveFiliere()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}

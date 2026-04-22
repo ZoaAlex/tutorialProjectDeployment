@@ -1,0 +1,135 @@
+<app-sidebar></app-sidebar>
+
+<div class="main-content">
+  <app-navbar pageTitle="Tableau de bord"></app-navbar>
+
+  <div class="content-wrapper">
+    <!-- Stats Cards
+    <div class="row g-4 mb-4">
+      @for (stat of stats(); track stat.titre; let i = $index) {
+        <div class="col-md-6 col-xl-3 animate-fade-in-up" [style.animation-delay]="(i * 0.1) + 's'">
+          <div class="card stat-card h-100">
+            <div class="card-body">
+              <div class="stat-content d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="stat-label mb-2">{{ stat.titre }}</p>
+                  <h2 class="stat-value">{{ stat.valeur }}</h2>
+                  <div class="stat-trend up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+12%</span>
+                  </div>
+                </div>
+                <div class="stat-icon" [class]="stat.color">
+                  <i class="fas {{ stat.icon }}"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div> -->
+
+    <div class="row g-4">
+      <!-- Today's Courses -->
+      <!-- <div class="col-lg-8 animate-fade-in-up" style="animation-delay: 0.4s">
+        <div class="card h-100">
+          <div class="card-header">
+            <i class="fas fa-calendar-day"></i>
+            <span>Cours d'aujourd'hui</span>
+            <a routerLink="/emploi-temps" class="btn btn-primary btn-sm ms-auto">
+              Voir tout <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th>Cours</th>
+                    <th>Horaire</th>
+                    <th>Salle</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of todayCours(); track c.id) {
+                    <tr class="animate-fade-in">
+                      <td>
+                        <div class="fw-bold text-white">{{ c.intitule }}</div>
+                        <small class="text-muted">{{ c.code }}</small>
+                      </td>
+                      <td>
+                        <i class="fas fa-clock me-2" style="color: var(--accent-purple)"></i>
+                        {{ c.heureDebut }} - {{ c.heureFin }}
+                      </td>
+                      <td>
+                        <i class="fas fa-map-marker-alt me-2" style="color: var(--accent-pink)"></i>
+                        {{ c.salleNom }}
+                      </td>
+                      <td>
+                        <span class="badge badge-{{ c.type.toLowerCase() }}">{{ c.type }}</span>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" class="text-center py-5">
+                        <div class="animate-float">
+                          <i class="fas fa-moon fa-3x mb-3" style="color: var(--accent-purple)"></i>
+                        </div>
+                        <p class="text-muted mb-0">Aucun cours aujourd'hui</p>
+                        <small class="text-muted">Profitez de votre journée !</small>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div> -->
+
+      <!-- Quick Actions -->
+      <div class="col-lg-4 animate-fade-in-up" style="animation-delay: 0.5s">
+        <div class="card h-100">
+          <div class="card-header">
+            <i class="fas fa-bolt"></i>
+            <span>Accès rapide</span>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-3">
+              <a routerLink="/emploi-temps" class="quick-action-btn">
+                <div class="action-icon" style="background: var(--gradient-purple)">
+                  <i class="fas fa-calendar-alt text-white"></i>
+                </div>
+                <div class="action-text">
+                  <div class="action-title">Mon emploi du temps</div>
+                  <div class="action-desc">Consulter le planning</div>
+                </div>
+              </a>
+              
+              <a routerLink="/reservations" class="quick-action-btn">
+                <div class="action-icon" style="background: var(--gradient-blue)">
+                  <i class="fas fa-plus text-white"></i>
+                </div>
+                <div class="action-text">
+                  <div class="action-title">Nouvelle réservation</div>
+                  <div class="action-desc">Réserver une salle</div>
+                </div>
+              </a>
+              
+              <a routerLink="/salles" class="quick-action-btn">
+                <div class="action-icon" style="background: var(--gradient-pink)">
+                  <i class="fas fa-search text-white"></i>
+                </div>
+                <div class="action-text">
+                  <div class="action-title">Chercher une salle</div>
+                  <div class="action-desc">Voir disponibilités</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

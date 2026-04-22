@@ -1,0 +1,300 @@
+{
+	"info": {
+		"_postman_id": "auth-service-collection",
+		"name": "Auth Service API",
+		"description": "Collection pour tester les endpoints du microservice auth-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/auth/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8082",
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Authentifie un utilisateur et retourne un token JWT"
+					},
+					"response": [
+						{
+							"name": "Login Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/login",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "login"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"mustChangePassword\": false,\n    \"roles\": [\"ROLE_ADMIN\"]\n}"
+						},
+						{
+							"name": "Login First Time",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"enseignant@example.com\",\n    \"password\": \"tempPassword\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/login",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "login"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"token\": null,\n    \"mustChangePassword\": true,\n    \"roles\": [\"ROLE_ENSEIGNANT\"]\n}"
+						}
+					]
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"oldPassword\": \"tempPassword\",\n    \"newPassword\": \"newSecurePassword123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8082/api/auth/change-password?email=enseignant@example.com",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8082",
+							"path": ["api", "auth", "change-password"],
+							"query": [
+								{
+									"key": "email",
+									"value": "enseignant@example.com",
+									"description": "Email de l'utilisateur"
+								}
+							]
+						},
+						"description": "Change le mot de passe d'un utilisateur"
+					},
+					"response": [
+						{
+							"name": "Change Password Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"oldPassword\": \"tempPassword\",\n    \"newPassword\": \"newSecurePassword123\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/change-password?email=enseignant@example.com",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "change-password"],
+									"query": [
+										{
+											"key": "email",
+											"value": "enseignant@example.com"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": "Mot de passe modifié avec succès"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Test Scenarios",
+			"item": [
+				{
+					"name": "Scenario 1 - First Login & Change Password",
+					"item": [
+						{
+							"name": "1. Login with temp password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"enseignant@example.com\",\n    \"password\": \"tempPassword\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/login",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "login"]
+								}
+							}
+						},
+						{
+							"name": "2. Change password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"oldPassword\": \"tempPassword\",\n    \"newPassword\": \"myNewPassword123\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/change-password?email=enseignant@example.com",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "change-password"],
+									"query": [
+										{
+											"key": "email",
+											"value": "enseignant@example.com"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "3. Login with new password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"enseignant@example.com\",\n    \"password\": \"myNewPassword123\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/login",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "login"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Scenario 2 - Invalid Credentials",
+					"item": [
+						{
+							"name": "Login with wrong password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"wrongPassword\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/login",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "login"]
+								}
+							}
+						},
+						{
+							"name": "Login with non-existent email",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"nonexistent@example.com\",\n    \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8082/api/auth/login",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8082",
+									"path": ["api", "auth", "login"]
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,68 @@
+<div class="login-page">
+  <div class="login-card card">
+    <div class="card-body p-5">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">IUSJC</h2>
+        <p class="text-muted">Créer un compte</p>
+      </div>
+      
+      @if (error()) {
+        <div class="alert alert-danger">{{ error() }}</div>
+      }
+      @if (success()) {
+        <div class="alert alert-success">{{ success() }}</div>
+      }
+      
+      <form (ngSubmit)="onSubmit()">
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label">Nom</label>
+            <input type="text" class="form-control" [(ngModel)]="user.nom" name="nom" required>
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label">Prénom</label>
+            <input type="text" class="form-control" [(ngModel)]="user.prenom" name="prenom" required>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" [(ngModel)]="user.email" name="email" required>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Mot de passe</label>
+          <input type="password" class="form-control" [(ngModel)]="user.password" name="password" required>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Rôle</label>
+          <select class="form-select" [(ngModel)]="user.role" name="role" required>
+
+            <option value="enseignant">Enseignant</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">École</label>
+          <select class="form-select" [(ngModel)]="user.ecole" name="ecole">
+            <option value="SJI">SJI</option>
+            <option value="SJM">SJM</option>
+            <option value="PrepaVogt">PrepaVogt</option>
+            <option value="CPGE">CPGE</option>
+          </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary w-100 py-2" [disabled]="loading()">
+          @if (loading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          S'inscrire
+        </button>
+      </form>
+      
+      <div class="text-center mt-4">
+        <span class="text-muted">Déjà un compte?</span>
+        <a routerLink="/login" class="text-primary ms-1">Se connecter</a>
+      </div>
+    </div>
+  </div>
+</div>

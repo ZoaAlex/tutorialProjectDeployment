@@ -1,0 +1,325 @@
+### CoursClasse-service API Tests
+
+@baseUrl = http://localhost:8085
+
+### --- CLASSE ENDPOINTS ---
+
+# @name getAllClasses
+GET {{baseUrl}}/api/classes
+Accept: application/json
+
+###
+
+# @name getClasseById
+GET {{baseUrl}}/api/classes/2
+Accept: application/json
+
+###
+
+# @name createClasse
+POST {{baseUrl}}/api/classes
+Content-Type: application/json
+
+{
+  "code": "L1info",
+  "nom": "Licence 3 Informatique",
+  "specialite": "Génie Logiciel",
+  "effectif": 45,
+  "ecoleId": 1,
+  "filiereId": 1,
+  "etudiantIds": []
+}
+
+###
+
+# @name updateClasse
+PUT {{baseUrl}}/api/classes/1
+Content-Type: application/json
+
+{
+  "code": "CL001-UPD",
+  "nom": "Licence 3 Informatique Modifiée",
+  "specialite": "Génie Logiciel & Data",
+  "effectif": 50,
+  "ecoleId": 1,
+  "filiereId": 1,
+  "etudiantIds": []
+}
+
+###
+
+# @name deleteClasse
+DELETE {{baseUrl}}/api/classes/1
+
+### --- COURS ENDPOINTS ---
+
+# @name getAllCours
+GET {{baseUrl}}/api/cours
+Accept: application/json
+
+###
+
+# @name getCoursById
+GET {{baseUrl}}/api/cours/1
+Accept: application/json
+
+###
+
+# @name createCours
+POST {{baseUrl}}/api/cours
+Content-Type: application/json
+
+{
+  "nom": "Maths ",
+  "ueId": 1,
+  "enseignantId": 4,
+  "classeId": 1,
+  "statutCours": "place",
+  "nbreheurefait": 0,
+  "volumeHoraire": 40
+}
+
+###
+
+# @name updateCours
+PUT {{baseUrl}}/api/cours/1
+Content-Type: application/json
+
+{
+  "codeCours": "MATH102",
+  "nbreCoursDonne": 1,
+  "volumehoraire":20,
+  "type": "COURS_MAGISTRAL",
+  "classeId": 2,
+  "salleId": 1,
+  "ueId": 2,
+  "enseignantId": 1
+}
+
+###
+
+# @name deleteCours
+DELETE {{baseUrl}}/api/cours/1
+
+### --- ECOLE ENDPOINTS ---
+
+# @name getAllEcoles
+GET {{baseUrl}}/api/ecoles
+Accept: application/json
+
+###
+
+# @name getEcoleById
+GET {{baseUrl}}/api/ecoles/1
+Accept: application/json
+
+###
+
+# @name createEcole
+POST {{baseUrl}}/api/ecoles
+Content-Type: application/json
+
+{
+  "code": "ESC01",
+  "nom": "École Supérieure de Commerce",
+  "description": "Formation d'excellence en management",
+  "classeIds": [],
+  "filiereIds": []
+}
+
+###
+
+# @name updateEcole
+PUT {{baseUrl}}/api/ecoles/1
+Content-Type: application/json
+
+{
+  "code": "ESC01",
+  "nom": "École Supérieure de Commerce (UPD)",
+  "description": "Description mise à jour",
+  "classeIds": [],
+  "filiereIds": []
+}
+
+###
+
+# @name deleteEcole
+DELETE {{baseUrl}}/api/ecoles/1
+
+### --- ETUDIANT ENDPOINTS ---
+
+# @name getAllEtudiants
+GET {{baseUrl}}/api/etudiants
+Accept: application/json
+
+###
+
+# @name getEtudiantById
+GET {{baseUrl}}/api/etudiants/1
+Accept: application/json
+
+###
+
+# @name createEtudiant
+POST {{baseUrl}}/api/etudiants
+Content-Type: application/json
+
+{
+  "matricule": "2024INF001",
+  "nom": "DOE",
+  "prenom": "John",
+  "sex": "MASCULINE",
+  "classeId": 1,
+  "ecoleId": 1,
+  "groupeIds": []
+}
+
+###
+
+# @name updateEtudiant
+PUT {{baseUrl}}/api/etudiants/1
+Content-Type: application/json
+
+{
+  "matricule": "2024INF001",
+  "nom": "DOE",
+  "prenom": "Johnathan",
+  "sex": "MASCULINE",
+  "classeId": 2,
+  "ecoleId": 2,
+  "groupeIds": []
+}
+
+###
+
+# @name deleteEtudiant
+DELETE {{baseUrl}}/api/etudiants/1
+
+### --- FILIERE ENDPOINTS ---
+
+# @name getAllFilieres
+GET {{baseUrl}}/api/filieres
+Accept: application/json
+
+###
+
+# @name getFiliereById
+GET {{baseUrl}}/api/filieres/1
+Accept: application/json
+
+###
+
+# @name createFiliere
+POST {{baseUrl}}/api/filieres
+Content-Type: application/json
+
+{
+  "code": "INF",
+  "nom": "Informatique",
+  "ecoleId": 1,
+  "classeIds": []
+}
+
+###
+
+# @name updateFiliere
+PUT {{baseUrl}}/api/filieres/1
+Content-Type: application/json
+
+{
+  "code": "INF",
+  "nom": "Informatique Appliquée",
+  "ecoleId": 1,
+  "classeIds": []
+}
+
+###
+
+# @name deleteFiliere
+DELETE {{baseUrl}}/api/filieres/1
+
+### --- GROUPE ETUDIANT ENDPOINTS ---
+
+# @name getAllGroupes
+GET {{baseUrl}}/api/groupes-etudiants
+Accept: application/json
+
+###
+
+# @name getGroupeById
+GET {{baseUrl}}/api/groupes-etudiants
+Accept: application/json
+
+###
+
+# @name createGroupe
+POST {{baseUrl}}/api/groupes-etudiants
+Content-Type: application/json
+
+{
+  "nom": "Groupe A",
+  "description": "Étudiants de première moitié",
+  "effectif": 20,
+  "etudiantIds": []
+}
+
+###
+
+# @name updateGroupe
+PUT {{baseUrl}}/api/groupes-etudiants/1
+Content-Type: application/json
+
+{
+  "nom": "Groupe A Bis",
+  "description": "Description mise à jour",
+  "effectif": 22,
+  "etudiantIds": [1]
+}
+
+###
+
+# @name deleteGroupe
+DELETE {{baseUrl}}/api/groupes-etudiants/1
+
+### --- UE ENDPOINTS ---
+
+# @name getAllUes
+GET {{baseUrl}}/api/ues
+Accept: application/json
+
+###
+
+# @name getUeById
+GET {{baseUrl}}/api/ues/1
+Accept: application/json
+
+###
+
+# @name createUe
+POST {{baseUrl}}/api/ues
+Content-Type: application/json
+
+{
+  "codeUe": "INFO310",
+  "intitule": "Machine Learning",
+  "idfiliere": 1,
+  "coursIds": []
+}
+
+###
+
+# @name updateUe
+PUT {{baseUrl}}/api/ues/1
+Content-Type: application/json
+
+{
+  "codeUe": "INFO310",
+  "intitule": "Intelligence Artificielle & Big Data",
+  "idfiliere": 1,
+  "coursIds": []
+}
+
+###
+
+# @name deleteUe
+DELETE {{baseUrl}}/api/ues/1

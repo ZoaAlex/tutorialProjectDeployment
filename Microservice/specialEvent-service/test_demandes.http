@@ -1,0 +1,27 @@
+### Special Events API Tests
+
+@host = http://localhost:8086/api
+
+### Create a new Demande (Teacher ID: 101)
+POST {{host}}/demandes
+Content-Type: application/json
+
+{
+  "titre": "Conférence sur la Cyber-sécurité",
+  "objectif": "Sensibiliser les étudiants aux menaces actuelles",
+  "debutEvent": "2026-03-10T09:00:00.000+00:00",
+  "finEvent": "2026-03-10T12:00:00.000+00:00",
+  "nbreLimitParticipant": 50,
+  "enseignantId": 7
+}
+
+### Get All Demandes (Admin View)
+GET {{host}}/demandes
+
+### Update Status (Admin Validation)
+# Note: Replace {id} with the ID from the previous POST response
+@demandeId = 2
+PATCH {{host}}/demandes/{{demandeId}}/status?status=VALIDE
+
+### Delete Demande
+DELETE {{host}}/demandes/{{demandeId}}

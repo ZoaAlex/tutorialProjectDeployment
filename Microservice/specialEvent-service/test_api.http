@@ -1,0 +1,55 @@
+@url= http://localhost:8086
+
+### DemandeEvent API
+
+# Create a new demand
+POST {{url}}/api/demandes
+Content-Type: application/json
+
+{
+  "titre": "Conférence AI 2026",
+  "objectif": "Présentation des nouvelles tendances",
+  "debutEvent": "2026-06-01T09:00:00.000+00:00",
+  "finEvent": "2026-06-01T17:00:00.000+00:00",
+  "nbreLimitParticipant": 100
+}
+
+###
+
+# Get all demands
+GET {{url}}/api/demandes
+
+###
+
+# Accept a demand (Change status to VALIDE)
+PATCH {{url}}/api/demandes/1/status?status=VALIDE
+
+###
+
+### SpecialEvent API
+
+# Create SpecialEvent from validated demand
+POST {{url}}/api/events/from-demande/1?type=CONFERENCE
+
+###
+
+# Get all special events
+GET {{url}}/api/events
+
+###
+
+# Update a special event
+PUT {{url}}/api/events/1
+Content-Type: application/json
+
+{
+  "titre": "Conférence AI 2026 - Updated",
+  "debutEvent": "2026-06-01T10:00:00.000+00:00",
+  "finEvent": "2026-06-01T18:00:00.000+00:00",
+  "typeSpecialEvent": "CONFERENCE"
+}
+
+###
+
+# Delete a special event
+DELETE {{url}}/api/events/1

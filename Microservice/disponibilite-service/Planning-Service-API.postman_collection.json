@@ -1,0 +1,479 @@
+{
+	"info": {
+		"_postman_id": "planning-service-api",
+		"name": "Planning Service API - Gestion Complète",
+		"description": "Collection Postman pour tester l'API complète : Universités, Écoles, Enseignants, Disponibilités, Cours et Conflits avec intégration RabbitMQ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8083",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Universites",
+			"item": [
+				{
+					"name": "Créer une université",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Institut Universitaire Saint Jean-Chrysostome\",\n  \"code\": \"IUSJC\",\n  \"description\": \"Université privée spécialisée en sciences et technologies\",\n  \"adresse\": \"123 Avenue de l'Université, Douala, Cameroun\",\n  \"telephone\": \"+237123456789\",\n  \"email\": \"contact@iusjc.edu\",\n  \"statut\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/universites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"universites"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir toutes les universités",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/universites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"universites"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir une université par ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/universites/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"universites",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Ecoles",
+			"item": [
+				{
+					"name": "Créer École d'Ingénierie (ESIG)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"École Supérieure d'Ingénierie et de Gestion\",\n  \"code\": \"ESIG\",\n  \"description\": \"École d'ingénierie spécialisée en informatique et génie civil\",\n  \"adresse\": \"Campus IUSJC, Bâtiment A\",\n  \"telephone\": \"+237123456790\",\n  \"email\": \"esig@iusjc.edu\",\n  \"statut\": \"ACTIVE\",\n  \"universiteId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ecoles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ecoles"
+							]
+						}
+					}
+				},
+				{
+					"name": "Créer École de Médecine (EMSS)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"École de Médecine et Sciences de la Santé\",\n  \"code\": \"EMSS\",\n  \"description\": \"Formation médicale et paramédicale de haut niveau\",\n  \"adresse\": \"Campus IUSJC, Bâtiment Médical\",\n  \"telephone\": \"+237123456791\",\n  \"email\": \"medecine@iusjc.edu\",\n  \"statut\": \"ACTIVE\",\n  \"universiteId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ecoles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ecoles"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir toutes les écoles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ecoles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ecoles"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir écoles par université",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ecoles/universite/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ecoles",
+								"universite",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Enseignants",
+			"item": [
+				{
+					"name": "Créer un enseignant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean\",\n  \"email\": \"jean.dupont@iusjc.edu\",\n  \"telephone\": \"+33123456789\",\n  \"specialite\": \"Mathématiques\",\n  \"grade\": \"Professeur\",\n  \"departement\": \"Sciences Exactes\",\n  \"statut\": \"ACTIF\",\n  \"userServiceId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/enseignants",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enseignants"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir tous les enseignants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/enseignants",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enseignants"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir un enseignant par ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/enseignants/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"enseignants",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Disponibilites",
+			"item": [
+				{
+					"name": "Créer une disponibilité",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jour\": \"LUNDI\",\n  \"heureDebut\": \"08:00:00\",\n  \"heureFin\": \"12:00:00\",\n  \"type\": \"MATIN\",\n  \"commentaire\": \"Disponible pour cours magistraux\",\n  \"estDisponible\": true,\n  \"enseignantId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/disponibilites",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"disponibilites"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir disponibilités par enseignant",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/disponibilites/enseignant/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"disponibilites",
+								"enseignant",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Cours",
+			"item": [
+				{
+					"name": "Créer un cours",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomCours\": \"Mathématiques I\",\n  \"codeCours\": \"MATH101\",\n  \"description\": \"Algèbre et analyse fondamentale\",\n  \"jour\": \"LUNDI\",\n  \"heureDebut\": \"08:00:00\",\n  \"heureFin\": \"10:00:00\",\n  \"salle\": \"A101\",\n  \"typeCours\": \"COURS_MAGISTRAL\",\n  \"nombreHeuresParSemaine\": 2,\n  \"commentaire\": \"Cours fondamental\",\n  \"ecoleId\": 1,\n  \"enseignantId\": 1,\n  \"statut\": \"ACTIF\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cours",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cours"
+							]
+						}
+					}
+				},
+				{
+					"name": "Créer cours avec conflit (Test RabbitMQ)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomCours\": \"Mathématiques Appliquées\",\n  \"codeCours\": \"MATH201\",\n  \"description\": \"Mathématiques pour ingénieurs\",\n  \"jour\": \"LUNDI\",\n  \"heureDebut\": \"09:00:00\",\n  \"heureFin\": \"11:00:00\",\n  \"salle\": \"B201\",\n  \"typeCours\": \"COURS_MAGISTRAL\",\n  \"nombreHeuresParSemaine\": 2,\n  \"commentaire\": \"CONFLIT ATTENDU - Test notification RabbitMQ\",\n  \"ecoleId\": 2,\n  \"enseignantId\": 1,\n  \"statut\": \"ACTIF\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cours",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cours"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir cours par enseignant",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cours/enseignant/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cours",
+								"enseignant",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Gestion des Conflits",
+			"item": [
+				{
+					"name": "Détecter conflits pour un cours",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conflits/cours/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conflits",
+								"cours",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtenir conflits non résolus",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conflits/non-resolus",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conflits",
+								"non-resolus"
+							]
+						}
+					}
+				},
+				{
+					"name": "Résoudre un conflit",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"solution\": \"Cours déplacé au mardi 14h-16h après négociation\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/conflits/1/resoudre",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conflits",
+								"1",
+								"resoudre"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Surcharge Enseignants",
+			"item": [
+				{
+					"name": "Obtenir statistiques de charge",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/surcharge-enseignants/statistiques",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"surcharge-enseignants",
+								"statistiques"
+							]
+						}
+					}
+				},
+				{
+					"name": "Détecter surcharges (Test RabbitMQ)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/surcharge-enseignants/detecter-toutes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"surcharge-enseignants",
+								"detecter-toutes"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

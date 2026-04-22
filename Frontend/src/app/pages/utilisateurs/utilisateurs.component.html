@@ -1,0 +1,104 @@
+<app-sidebar></app-sidebar>
+
+<div class="main-content">
+  <app-navbar pageTitle="Gestion des Utilisateurs"></app-navbar>
+  
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-md-4">
+          <input type="text" class="form-control" placeholder="Rechercher..." [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [ngModel]="filterRole()" (ngModelChange)="filterRole.set($event)">
+            <option value="">Tous les rôles</option>
+            <option value="admin">Administrateur</option>
+            <option value="enseignant">Enseignant</option>
+          </select>
+        </div>
+        <div class="col-md-5 text-end">
+          <button class="btn btn-primary" (click)="openModal()"><i class="fas fa-plus me-2"></i>Nouvel utilisateur</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Activité</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            @for (u of filteredUsers(); track u.id) {
+              <tr>
+                <td><strong>{{ u.prenom }} {{ u.nom }}</strong></td>
+                <td>{{ u.email }}</td>
+                <td>
+                  <span class="badge" [class.bg-danger]="u.role ==='ROLE_ADMIN'" [class.bg-primary]="u.role === 'ROLE_ENSEIGNANT'">
+                    {{ u.role === 'ROLE_ENSEIGNANT' ? 'Enseignant' : u.role === 'ROLE_ADMIN' ? 'Administrateur' : 'Inconnu'}}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [class.bg-success]="u.statut === 'ACTIF'" [class.bg-secondary]="u.statut === 'INACTIF'">
+                    {{ u.statut === 'ACTIF' ? 'Actif' : u.statut === 'INACTIF' ? 'Inactif' : 'Inconnu'}}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary me-1" (click)="openModal(u)"><i class="fas fa-edit"></i></button>
+                  @if(u.role=="ROLE_ENSEIGNANT"){
+                     <button class="btn btn-sm btn-outline-secondary me-1" (click)="updateUserStatus(u.id,u)"><i class="fas fa-key"></i></button>
+                  }
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(u.id)"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Utilisateur -->
+@if (showModal()) {
+  <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouvel' }} utilisateur</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">Nom</label>
+              <input type="text" class="form-control" [(ngModel)]="currentUser().nom">
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">Prénom</label>
+              <input type="text" class="form-control" [(ngModel)]="currentUser().prenom">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" [(ngModel)]="currentUser().email">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rôle</label>
+            <select class="form-select" [(ngModel)]="currentUser().role">
+              <option value="ROLE_ADMIN">Administrateur</option>
+              <option value="ROLE_ENSEIGNANT">Enseignant</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          <button type="button" class="btn btn-primary" (click)="saveUser()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

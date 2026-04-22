@@ -1,0 +1,215 @@
+### Salles Service API Tests
+
+@baseUrl = http://localhost:8084
+@userId = system
+
+### --- ECOLES & UNIVERSITES ---
+
+# @name getAllUniversites
+GET {{baseUrl}}/api/ecoles/universites
+
+###
+
+# @name getUniversiteById
+GET {{baseUrl}}/api/ecoles/universites/1
+
+###
+
+# @name getAllEcoles
+GET {{baseUrl}}/api/ecoles
+
+###
+
+# @name getEcoleById
+GET {{baseUrl}}/api/ecoles/1
+
+###
+
+# @name getEcolesByUniversiteId
+GET {{baseUrl}}/api/ecoles/universite/1
+
+###
+
+# @name getEcoleByCode
+GET {{baseUrl}}/api/ecoles/code/ECOLE001
+
+###
+
+# @name healthEcoles
+GET {{baseUrl}}/api/ecoles/health
+
+
+### --- SALLES ---
+
+# @name creerSalle
+POST {{baseUrl}}/api/salles
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "codeSalle": "S001",
+  "nom": "Salle de Conférence A",
+  "capacite": 50,
+  "typeSalle": "AMPHITHEATRE",
+  "description": "Grande salle avec projecteur",
+  "emplacement": "Bâtiment A, 1er étage",
+  "etage": 1,
+  "batiment": "A",
+  "surface": 75.5,
+  "accessibleHandicap": true,
+  "climatisee": true,
+  "wifiDisponible": true
+}
+
+###
+
+# @name getAllSalles
+GET {{baseUrl}}/api/salles
+
+###
+
+# @name getSalleById
+GET {{baseUrl}}/api/salles/1
+
+###
+
+# @name rechercherSalles
+POST {{baseUrl}}/api/salles/recherche
+Content-Type: application/json
+
+{
+  "nom": "Conférence",
+  "capaciteMin": 20,
+  "typeSalle": "BUREAU"
+}
+
+###
+
+# @name getSallesDisponibles
+GET {{baseUrl}}/api/salles/disponibles?dateDebut=2026-03-01T08:00:00&dateFin=2026-03-01T10:00:00&ecoleId=1
+
+###
+
+# @name mettreAJourSalle
+@salleId = 1
+PUT {{baseUrl}}/api/salles/{{salleId}}
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "id": 1,
+  "codeSalle": "S001-MOD",
+  "nom": "Salle de Conférence A (Modifiée)",
+  "capacite": 55,
+  "typeSalle": "AMPHI",
+  "ecoleId": 1
+}
+
+###
+
+# @name changerStatutSalle
+PATCH {{baseUrl}}/api/salles/1/statut?statut=MAINTENANCE
+X-User-Id: {{userId}}
+
+###
+
+# @name supprimerSalle
+DELETE {{baseUrl}}/api/salles/1
+X-User-Id: {{userId}}
+
+###
+
+# @name healthSalles
+GET {{baseUrl}}/api/salles/health
+
+
+### --- MATERIELS ---
+
+# @name creerMateriel
+POST {{baseUrl}}/api/materiels
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "nom": "PB",
+  "type": "ORDINATEUR",
+  "description": "Ordinateur donnée par l'état",
+  "quantite": 1,
+  "quantiteFonctionnelle": 1,
+  "marque": "Epson",
+  "modele": "EB-FH06",
+  "salleId": 1
+}
+
+###
+
+# @name getAllMateriel
+GET {{baseUrl}}/api/materiels
+
+###
+
+# @name getMaterielParSalle
+GET {{baseUrl}}/api/materiels/salle/1
+
+###
+
+# @name rechercherMateriel
+GET {{baseUrl}}/api/materiels/recherche?terme=Projecteur
+
+###
+
+# @name changerEtatMateriel
+PATCH {{baseUrl}}/api/materiels/1/etat?etat=EN_PANNE
+X-User-Id: {{userId}}
+
+###
+
+# @name healthMateriels
+GET {{baseUrl}}/api/materiels/health
+
+
+### --- RESERVATIONS ---
+
+# @name creerReservation
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "dateDebut": "2026-04-01T09:00:00",
+  "dateFin": "2026-04-01T11:00:00",
+  "motif": "Réunion projet Tutored",
+  "description": "Validation architecture microservices",
+  "utilisateurId": 101,
+  "salleId": 1,
+  "nombreParticipants": 10,
+  "priorite": 1,
+  "recurrente": false
+}
+
+###
+
+# @name getAllReservations
+GET {{baseUrl}}/api/reservations
+
+###
+
+# @name getReservationsEnAttente
+GET {{baseUrl}}/api/reservations/en-attente
+
+###
+
+# @name validerReservation
+PATCH {{baseUrl}}/api/reservations/1/valider?validateurId=1
+X-User-Id: {{userId}}
+
+###
+
+# @name annulerReservation
+PATCH {{baseUrl}}/api/reservations/1/annuler
+X-User-Id: {{userId}}
+
+###
+
+# @name healthReservations
+GET {{baseUrl}}/api/reservations/health

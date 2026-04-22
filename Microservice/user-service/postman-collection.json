@@ -1,0 +1,240 @@
+{
+	"info": {
+		"_postman_id": "user-service-collection",
+		"name": "User Service API",
+		"description": "Collection pour tester les endpoints du microservice user-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/users",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "users"]
+						},
+						"description": "Récupère la liste de tous les utilisateurs"
+					}
+				},
+				{
+					"name": "Get User By Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/users/by-email?email=admin@example.com",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "users", "by-email"],
+							"query": [
+								{
+									"key": "email",
+									"value": "admin@example.com",
+									"description": "Email de l'utilisateur"
+								}
+							]
+						},
+						"description": "Récupère un utilisateur par son email"
+					}
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/users/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "users", "1"]
+						},
+						"description": "Récupère un utilisateur par son ID"
+					}
+				},
+				{
+					"name": "Check Email Exists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/users/exists?email=test@example.com",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "users", "exists"],
+							"query": [
+								{
+									"key": "email",
+									"value": "test@example.com",
+									"description": "Email à vérifier"
+								}
+							]
+						},
+						"description": "Vérifie si un email existe déjà"
+					}
+				},
+				{
+					"name": "Mark Password Changed",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/users/1/mark-password-changed",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "users", "1", "mark-password-changed"]
+						},
+						"description": "Marque que l'utilisateur a changé son mot de passe initial"
+					}
+				}
+			]
+		},
+		{
+			"name": "Enseignants",
+			"item": [
+				{
+					"name": "Create Enseignant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nom\": \"Dupont\",\n    \"prenom\": \"Jean\",\n    \"email\": \"jean.dupont@example.com\",\n    \"password\": \"tempPassword123\",\n    \"specialite\": \"Mathématiques\",\n    \"grade\": \"Professeur\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/enseignants",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "enseignants"]
+						},
+						"description": "Crée un nouvel enseignant avec un mot de passe temporaire"
+					},
+					"response": [
+						{
+							"name": "Create Enseignant Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"nom\": \"Dupont\",\n    \"prenom\": \"Jean\",\n    \"email\": \"jean.dupont@example.com\",\n    \"password\": \"tempPassword123\",\n    \"specialite\": \"Mathématiques\",\n    \"grade\": \"Professeur\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8081/api/enseignants",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8081",
+									"path": ["api", "enseignants"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"nom\": \"Dupont\",\n    \"prenom\": \"Jean\",\n    \"email\": \"jean.dupont@example.com\",\n    \"specialite\": \"Mathématiques\",\n    \"grade\": \"Professeur\",\n    \"roles\": [\"ROLE_ENSEIGNANT\"]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All Enseignants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/enseignants",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "enseignants"]
+						},
+						"description": "Récupère la liste de tous les enseignants"
+					},
+					"response": [
+						{
+							"name": "Get All Enseignants Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8081/api/enseignants",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8081",
+									"path": ["api", "enseignants"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"nom\": \"Dupont\",\n        \"prenom\": \"Jean\",\n        \"email\": \"jean.dupont@example.com\",\n        \"specialite\": \"Mathématiques\",\n        \"grade\": \"Professeur\",\n        \"statut\": \"ACTIF\",\n        \"roles\": [\"ROLE_ENSEIGNANT\"],\n        \"mustChangePassword\": true\n    },\n    {\n        \"id\": 2,\n        \"nom\": \"Martin\",\n        \"prenom\": \"Sophie\",\n        \"email\": \"sophie.martin@example.com\",\n        \"specialite\": \"Physique\",\n        \"grade\": \"Maître de conférences\",\n        \"statut\": \"ACTIF\",\n        \"roles\": [\"ROLE_ENSEIGNANT\"],\n        \"mustChangePassword\": false\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Get Enseignant By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/enseignants/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8081",
+							"path": ["api", "enseignants", "1"]
+						},
+						"description": "Récupère un enseignant par son ID"
+					},
+					"response": [
+						{
+							"name": "Get Enseignant By ID Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8081/api/enseignants/1",
+									"protocol": "http",
+									"host": ["localhost"],
+									"port": "8081",
+									"path": ["api", "enseignants", "1"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"nom\": \"Dupont\",\n    \"prenom\": \"Jean\",\n    \"email\": \"jean.dupont@example.com\",\n    \"specialite\": \"Mathématiques\",\n    \"grade\": \"Professeur\",\n    \"statut\": \"ACTIF\",\n    \"roles\": [\"ROLE_ENSEIGNANT\"],\n    \"mustChangePassword\": true\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8081",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,428 @@
+<app-sidebar></app-sidebar>
+
+<div class="main-content">
+  <app-navbar pageTitle="Gestion des Salles"></app-navbar>
+
+  <div class="content-wrapper">
+
+    <!-- ── Toast succès ──────────────────────────────────────── -->
+    @if (successMessage()) {
+      <div class="toast-success">
+        <i class="fas fa-check-circle"></i>{{ successMessage() }}
+      </div>
+    }
+
+    <!-- ── Alerte erreur ─────────────────────────────────────── -->
+    @if (errorMessage()) {
+      <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>{{ errorMessage() }}</span>
+        <button class="btn-close ms-auto" (click)="errorMessage.set('')"></button>
+      </div>
+    }
+
+    <!-- ── En-tête + stats rapides ───────────────────────────── -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <div>
+        <h2 class="mb-1" style="font-weight:800; color:var(--text-primary)">
+          <i class="fas fa-door-open me-2" style="color:var(--accent-purple)"></i>Salles
+        </h2>
+        <p class="mb-0" style="color:var(--text-muted); font-size:.85rem">
+          {{ salles().length }} salle(s) enregistrée(s)
+        </p>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <!-- Pills statut -->
+        <div class="stat-pill">
+          <span class="pill-dot" style="background:#10b981"></span>{{ sallesLibres() }} libre(s)
+        </div>
+        <div class="stat-pill">
+          <span class="pill-dot" style="background:#ef4444"></span>{{ sallesOccupees() }} occupée(s)
+        </div>
+        <div class="stat-pill">
+          <span class="pill-dot" style="background:#f59e0b"></span>{{ sallesMaintenance() }} indispo
+        </div>
+        <!-- Bouton créer -->
+        <button class="btn btn-primary d-flex align-items-center gap-2" (click)="openModal()">
+          <i class="fas fa-plus"></i>Nouvelle salle
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Toolbar filtres + vue ──────────────────────────────── -->
+    <div class="toolbar-card mb-4">
+      <!-- Recherche -->
+      <div class="position-relative flex-grow-1" style="min-width:200px; max-width:320px">
+        <i class="fas fa-search position-absolute" style="left:.85rem; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:.8rem"></i>
+        <input type="text" class="form-control" style="padding-left:2.2rem; border-radius:10px"
+          placeholder="Nom, code, bâtiment, école..."
+          [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+      </div>
+
+      <!-- Filtre type -->
+      <select class="form-select" style="width:auto; min-width:140px"
+        [ngModel]="filterType()" (ngModelChange)="filterType.set($event)">
+        <option value="">Tous les types</option>
+        @for (type of typesSalle; track type) {
+          <option [value]="type">{{ getTypeConfig(type).label }}</option>
+        }
+      </select>
+
+      <!-- Filtre statut -->
+      <select class="form-select" style="width:auto; min-width:150px"
+        [ngModel]="filterStatut()" (ngModelChange)="filterStatut.set($event)">
+        <option value="">Tous les statuts</option>
+        @for (statut of statutsSalle; track statut) {
+          <option [value]="statut">{{ getStatutConfig(statut).label }}</option>
+        }
+      </select>
+
+      <div class="ms-auto d-flex gap-1">
+        <button class="view-toggle-btn" [class.active]="viewMode()==='grid'" (click)="viewMode.set('grid')" title="Vue grille">
+          <i class="fas fa-th-large fa-sm"></i>
+        </button>
+        <button class="view-toggle-btn" [class.active]="viewMode()==='list'" (click)="viewMode.set('list')" title="Vue liste">
+          <i class="fas fa-list fa-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Chargement ─────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="text-center py-5">
+        <div class="spinner-border" style="color:var(--accent-purple)" role="status"></div>
+        <p class="mt-3" style="color:var(--text-muted)">Chargement des salles...</p>
+      </div>
+    }
+
+    <!-- ── Résultats ──────────────────────────────────────────── -->
+    @if (!isLoading()) {
+
+      <!-- Compteur résultats -->
+      @if (searchTerm() || filterType() || filterStatut()) {
+        <p class="mb-3" style="color:var(--text-muted); font-size:.85rem">
+          <i class="fas fa-filter me-1"></i>{{ filteredSalles().length }} résultat(s) sur {{ salles().length }}
+        </p>
+      }
+
+      <!-- ── VUE GRILLE ─────────────────────────────────────── -->
+      @if (viewMode() === 'grid') {
+        <div class="row g-3">
+          @for (salle of filteredSalles(); track salle.id) {
+            <div class="col-sm-6 col-xl-4">
+              <div class="salle-card card h-100" [class.card-hors-service]="salle.statut === StatutSalle.HORS_SERVICE">
+
+                <!-- En-tête carte -->
+                <div class="salle-card-header">
+                  <div class="d-flex align-items-start gap-2">
+                    <div class="type-icon-wrap">
+                      <i class="fas {{ getTypeConfig(salle.typeSalle).icon }}"></i>
+                    </div>
+                    <div class="flex-grow-1 min-w-0">
+                      <div class="salle-name text-truncate">{{ salle.nom }}</div>
+                      <div class="salle-code">{{ salle.codeSalle }}</div>
+                    </div>
+                    <!-- Badge statut -->
+                    <span class="badge {{ getStatutConfig(salle.statut).badge }} d-flex align-items-center gap-1" style="border-radius:20px; font-size:.72rem">
+                      <span class="status-dot {{ getStatutConfig(salle.statut).dot }}"></span>
+                      {{ getStatutConfig(salle.statut).label }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Corps carte -->
+                <div class="card-body d-flex flex-column gap-2 py-3">
+
+                  <!-- Infos principales -->
+                  <div class="info-row">
+                    <i class="fas fa-users"></i>
+                    <span>{{ salle.capacite }} places</span>
+                    <span class="ms-auto" style="font-size:.75rem; color:var(--text-muted)">{{ getTypeConfig(salle.typeSalle).label }}</span>
+                  </div>
+
+                  @if (salle.nomEcole) {
+                    <div class="info-row">
+                      <i class="fas fa-university"></i>
+                      <span class="text-truncate">{{ salle.nomEcole }}</span>
+                    </div>
+                  }
+
+                  @if (salle.batiment || salle.etage != null) {
+                    <div class="info-row">
+                      <i class="fas fa-building"></i>
+                      <span>
+                        {{ salle.batiment ?? '' }}
+                        @if (salle.etage != null) { <span class="ms-1">· Étage {{ salle.etage }}</span> }
+                      </span>
+                    </div>
+                  }
+
+                  @if (salle.surface) {
+                    <div class="info-row">
+                      <i class="fas fa-ruler-combined"></i>
+                      <span>{{ salle.surface }} m²</span>
+                    </div>
+                  }
+
+                  <!-- Équipements -->
+                  @if (salle.wifiDisponible || salle.climatisee || salle.accessibleHandicap) {
+                    <div class="d-flex gap-1 flex-wrap mt-1">
+                      @if (salle.wifiDisponible) {
+                        <span class="equip-chip"><i class="fas fa-wifi"></i>WiFi</span>
+                      }
+                      @if (salle.climatisee) {
+                        <span class="equip-chip"><i class="fas fa-snowflake"></i>Clim</span>
+                      }
+                      @if (salle.accessibleHandicap) {
+                        <span class="equip-chip"><i class="fas fa-wheelchair"></i>PMR</span>
+                      }
+                      @if (salle.nombreReservationsActives && salle.nombreReservationsActives > 0) {
+                        <span class="equip-chip" style="background:rgba(245,158,11,.12);color:#f59e0b;border-color:rgba(245,158,11,.25)">
+                          <i class="fas fa-calendar-check"></i>{{ salle.nombreReservationsActives }} résa
+                        </span>
+                      }
+                    </div>
+                  }
+
+                  <!-- Actions -->
+                  <div class="d-flex gap-2 mt-auto pt-2" style="border-top:1px solid var(--border-color)">
+                    <button class="btn-action flex-grow-1" (click)="openModal(salle)">
+                      <i class="fas fa-pen me-1"></i>Modifier
+                    </button>
+
+                    <!-- Dropdown statut -->
+                    <div class="dropdown">
+                      <button class="btn-action dropdown-toggle" data-bs-toggle="dropdown" style="white-space:nowrap">
+                        Statut
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        @for (statut of statutsSalle; track statut) {
+                          @if (statut !== salle.statut) {
+                            <li>
+                              <button class="dropdown-item d-flex align-items-center gap-2" (click)="changerStatut(salle, statut)">
+                                <span class="status-dot {{ getStatutConfig(statut).dot }}"></span>
+                                {{ getStatutConfig(statut).label }}
+                              </button>
+                            </li>
+                          }
+                        }
+                      </ul>
+                    </div>
+
+                    <button class="btn-action btn-action-danger" (click)="deleteSalle(salle)" title="Supprimer">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Empty state -->
+          @if (filteredSalles().length === 0) {
+            <div class="col-12">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-door-open"></i></div>
+                <h5 style="color:var(--text-secondary)">Aucune salle trouvée</h5>
+                <p style="font-size:.85rem">Modifiez vos filtres ou créez une nouvelle salle.</p>
+                <button class="btn btn-primary mt-2" (click)="openModal()">
+                  <i class="fas fa-plus me-2"></i>Créer une salle
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── VUE LISTE ──────────────────────────────────────── -->
+      @if (viewMode() === 'list') {
+        <div>
+          @for (salle of filteredSalles(); track salle.id) {
+            <div class="list-row">
+              <div class="type-icon-wrap" style="width:34px;height:34px;font-size:.85rem">
+                <i class="fas {{ getTypeConfig(salle.typeSalle).icon }}"></i>
+              </div>
+              <div style="min-width:160px">
+                <div class="salle-name">{{ salle.nom }}</div>
+                <div class="salle-code">{{ salle.codeSalle }}</div>
+              </div>
+              <span class="badge {{ getStatutConfig(salle.statut).badge }} d-flex align-items-center gap-1" style="border-radius:20px;font-size:.72rem">
+                <span class="status-dot {{ getStatutConfig(salle.statut).dot }}"></span>
+                {{ getStatutConfig(salle.statut).label }}
+              </span>
+              <div class="info-row ms-2"><i class="fas fa-users"></i>{{ salle.capacite }}</div>
+              @if (salle.nomEcole) {
+                <div class="info-row d-none d-md-flex"><i class="fas fa-university"></i><span class="text-truncate" style="max-width:140px">{{ salle.nomEcole }}</span></div>
+              }
+              @if (salle.batiment) {
+                <div class="info-row d-none d-lg-flex"><i class="fas fa-building"></i>{{ salle.batiment }}</div>
+              }
+              <div class="d-flex gap-1 ms-auto">
+                @if (salle.wifiDisponible) { <span class="equip-chip"><i class="fas fa-wifi"></i></span> }
+                @if (salle.climatisee) { <span class="equip-chip"><i class="fas fa-snowflake"></i></span> }
+                @if (salle.accessibleHandicap) { <span class="equip-chip"><i class="fas fa-wheelchair"></i></span> }
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn-action" (click)="openModal(salle)"><i class="fas fa-pen"></i></button>
+                <div class="dropdown">
+                  <button class="btn-action dropdown-toggle" data-bs-toggle="dropdown">Statut</button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    @for (statut of statutsSalle; track statut) {
+                      @if (statut !== salle.statut) {
+                        <li>
+                          <button class="dropdown-item d-flex align-items-center gap-2" (click)="changerStatut(salle, statut)">
+                            <span class="status-dot {{ getStatutConfig(statut).dot }}"></span>
+                            {{ getStatutConfig(statut).label }}
+                          </button>
+                        </li>
+                      }
+                    }
+                  </ul>
+                </div>
+                <button class="btn-action btn-action-danger" (click)="deleteSalle(salle)"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          }
+
+          @if (filteredSalles().length === 0) {
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fas fa-door-open"></i></div>
+              <h5 style="color:var(--text-secondary)">Aucune salle trouvée</h5>
+            </div>
+          }
+        </div>
+      }
+
+    }
+  </div><!-- /content-wrapper -->
+</div><!-- /main-content -->
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Modal Créer / Modifier une salle                          -->
+<!-- ══════════════════════════════════════════════════════════ -->
+@if (showModal()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.55);backdrop-filter:blur(4px)">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title d-flex align-items-center gap-2">
+            <span style="width:32px;height:32px;border-radius:8px;background:var(--gradient-purple);display:flex;align-items:center;justify-content:center;color:white;font-size:.85rem">
+              <i class="fas fa-door-open"></i>
+            </span>
+            {{ editMode() ? 'Modifier la salle' : 'Nouvelle salle' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="salleForm">
+
+            <!-- Section Identification -->
+            <div class="form-section-title"><i class="fas fa-id-card me-2"></i>Identification</div>
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <label class="form-label">Code salle <span style="color:#ef4444">*</span></label>
+                <input type="text" class="form-control" formControlName="codeSalle"
+                  placeholder="ex: A101" [class.is-invalid]="hasError('codeSalle')"
+                  [attr.readonly]="editMode() ? true : null"
+                  [style.cursor]="editMode() ? 'not-allowed' : 'auto'"
+                  [style.background]="editMode() ? 'var(--bg-tertiary)' : null">
+                @if (editMode()) {
+                  <div class="form-text" style="font-size:.72rem; color:var(--text-muted)">
+                    <i class="fas fa-lock me-1"></i>Non modifiable après création
+                  </div>
+                } @else {
+                  <div class="invalid-feedback">Code requis (max 20 caractères)</div>
+                }
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">Nom <span style="color:#ef4444">*</span></label>
+                <input type="text" class="form-control" formControlName="nom"
+                  placeholder="ex: Salle de cours A101" [class.is-invalid]="hasError('nom')">
+                <div class="invalid-feedback">Nom requis (min 3 caractères)</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Capacité <span style="color:#ef4444">*</span></label>
+                <input type="number" class="form-control" formControlName="capacite" min="1" max="1000"
+                  [class.is-invalid]="hasError('capacite')">
+                <div class="invalid-feedback">Capacité entre 1 et 1000</div>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">Type <span style="color:#ef4444">*</span></label>
+                <select class="form-select" formControlName="typeSalle">
+                  @for (type of typesSalle; track type) {
+                    <option [value]="type">{{ getTypeConfig(type).label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <!-- Section Localisation -->
+            <div class="form-section-title"><i class="fas fa-map-marker-alt me-2"></i>Localisation</div>
+            <div class="row g-3 mb-4">
+              <div class="col-md-5">
+                <label class="form-label">Bâtiment</label>
+                <input type="text" class="form-control" formControlName="batiment" placeholder="ex: Bâtiment A">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Étage</label>
+                <input type="number" class="form-control" formControlName="etage" placeholder="0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Surface (m²)</label>
+                <input type="number" class="form-control" formControlName="surface" step="0.5" placeholder="ex: 45">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Emplacement</label>
+                <input type="text" class="form-control" formControlName="emplacement"
+                  placeholder="ex: Aile nord, rez-de-chaussée">
+              </div>
+            </div>
+
+            <!-- Section Description -->
+            <div class="form-section-title"><i class="fas fa-align-left me-2"></i>Description</div>
+            <div class="mb-4">
+              <textarea class="form-control" formControlName="description" rows="2"
+                placeholder="Description optionnelle de la salle..."></textarea>
+            </div>
+
+            <!-- Section Équipements -->
+            <div class="form-section-title"><i class="fas fa-plug me-2"></i>Équipements</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <label class="equip-toggle" [class.checked]="salleForm.get('wifiDisponible')?.value"
+                (click)="salleForm.get('wifiDisponible')?.setValue(!salleForm.get('wifiDisponible')?.value)">
+                <input type="checkbox" formControlName="wifiDisponible">
+                <i class="fas fa-wifi"></i> WiFi
+              </label>
+              <label class="equip-toggle" [class.checked]="salleForm.get('climatisee')?.value"
+                (click)="salleForm.get('climatisee')?.setValue(!salleForm.get('climatisee')?.value)">
+                <input type="checkbox" formControlName="climatisee">
+                <i class="fas fa-snowflake"></i> Climatisée
+              </label>
+              <label class="equip-toggle" [class.checked]="salleForm.get('accessibleHandicap')?.value"
+                (click)="salleForm.get('accessibleHandicap')?.setValue(!salleForm.get('accessibleHandicap')?.value)">
+                <input type="checkbox" formControlName="accessibleHandicap">
+                <i class="fas fa-wheelchair"></i> Accessible PMR
+              </label>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" (click)="closeModal()">Annuler</button>
+          <button type="button" class="btn btn-primary d-flex align-items-center gap-2"
+            (click)="saveSalle()" [disabled]="isSaving()">
+            @if (isSaving()) { <span class="spinner-border spinner-border-sm"></span> }
+            @else { <i class="fas fa-save"></i> }
+            {{ editMode() ? 'Enregistrer' : 'Créer la salle' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

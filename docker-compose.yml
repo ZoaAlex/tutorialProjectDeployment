@@ -1,0 +1,309 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Réseaux
+# ─────────────────────────────────────────────────────────────────────────────
+networks:
+  backend:          # communication inter-microservices
+    driver: bridge
+  frontend-net:     # frontend → gateway uniquement
+    driver: bridge
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Volumes nommés
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  mysql-data:
+  rabbitmq-data:
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Services
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+
+  # ── MySQL (toutes les bases dans un seul conteneur) ────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATASOURCE_ROOT_PASSWORD}
+      MYSQL_USER: ${DATASOURCE_USERNAME}
+      MYSQL_PASSWORD: ${DATASOURCE_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DATASOURCE_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── RabbitMQ ──────────────────────────────────────────────────────────────
+  # rabbitmq:
+  #   image: rabbitmq:3.13-management-alpine
+  #   container_name: rabbitmq
+  #   restart: unless-stopped
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: guest
+  #     RABBITMQ_DEFAULT_PASS: guest
+  #   volumes:
+  #     - rabbitmq-data:/var/lib/rabbitmq
+  #   ports:
+  #     - "15672:15672"   # management UI (optionnel en prod)
+  #   networks:
+  #     - backend
+  #   healthcheck:
+  #     test: ["CMD", "rabbitmq-diagnostics", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 10
+  #     start_period: 20s
+
+  # ── Eureka Server ─────────────────────────────────────────────────────────
+  eureka:
+    build:
+      context: ./Microservice/EurekaServeur
+      dockerfile: Dockerfile
+    container_name: eureka
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8760
+      SPRING_APPLICATION_NAME: eureka-server
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+      SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED: "false"
+    ports:
+      - "8760:8760"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8760/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 40s
+
+  # ── User Service ──────────────────────────────────────────────────────────
+  user-service:
+    build:
+      context: ./Microservice/user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_started
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8081
+      SPRING_APPLICATION_NAME: user-service
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/userdb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
+
+  # ── Auth Service ──────────────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: ./Microservice/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    depends_on:
+      user-service:
+        condition: service_started
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8082
+      SPRING_APPLICATION_NAME: auth-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      USER_SERVICE_URL: http://user-service:8081
+      # Mail — remplacer par des secrets en prod
+      SPRING_MAIL_HOST: smtp-relay.brevo.com
+      SPRING_MAIL_PORT: 587
+    networks:
+      - backend
+
+  # ── Disponibilite Service ─────────────────────────────────────────────────
+  disponibilite-service:
+    build:
+      context: ./Microservice/disponibilite-service
+      dockerfile: Dockerfile
+    container_name: disponibilite-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_started
+      # rabbitmq:
+      #   condition: service_started
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8083
+      SPRING_APPLICATION_NAME: disponibilite-service
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/dispodb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    networks:
+      - backend
+
+  # ── Salle Service ─────────────────────────────────────────────────────────
+  salle-service:
+    build:
+      context: ./Microservice/salle-service
+      dockerfile: Dockerfile
+    container_name: salle-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_started
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8084
+      SPRING_APPLICATION_NAME: salles-service
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sallesdb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    networks:
+      - backend
+
+  # ── CoursClasse Service ───────────────────────────────────────────────────
+  coursclasse-service:
+    build:
+      context: ./Microservice/CoursClasse-service
+      dockerfile: Dockerfile
+    container_name: coursclasse-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_started
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8085
+      SPRING_APPLICATION_NAME: CoursClasse-service
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/coursclassedb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    networks:
+      - backend
+
+  # ── SpecialEvent Service ──────────────────────────────────────────────────
+  specialevent-service:
+    build:
+      context: ./Microservice/specialEvent-service
+      dockerfile: Dockerfile
+    container_name: specialevent-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_started
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8086
+      SPRING_APPLICATION_NAME: SpecialEvent-service
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/specialeventdb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    networks:
+      - backend
+
+  # ── Planning Service ──────────────────────────────────────────────────────
+  planning-service:
+    build:
+      context: ./Microservice/planning-service
+      dockerfile: Dockerfile
+    container_name: planning-service
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_started
+      # rabbitmq:
+      #   condition: service_started
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8087
+      SPRING_APPLICATION_NAME: planning-service
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/planningdb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    networks:
+      - backend
+
+  # ── Gateway ───────────────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: ./Microservice/gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    restart: unless-stopped
+    depends_on:
+      eureka:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      SPRING_APPLICATION_NAME: gateway
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+      - frontend-net
+
+  # ── Frontend Angular ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      - gateway
+    ports:
+      - "80:80"
+    networks:
+      - frontend-net
