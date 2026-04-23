@@ -4,49 +4,88 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class RoutesConfig {
 
-        @Bean
-        public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
-                return builder.routes()
-                                // AUTH SERVICE
-                                .route("auth-service", r -> r.path("/api/auth/**")
-                                                .uri("http://localhost:8082"))
+    // ── Profil LOCAL (défaut) ────────────────────────────────────────────────
+    @Bean
+    @Profile("!docker")
+    public RouteLocator localRoutes(RouteLocatorBuilder builder) {
+        return buildRoutes(builder,
+                "http://localhost:8081",
+                "http://localhost:8082",
+                "http://localhost:8083",
+                "http://localhost:8084",
+                "http://localhost:8085",
+                "http://localhost:8086",
+                "http://localhost:8087"
+        );
+    }
 
-                                // USER SERVICE
-                                // Maps multiple paths to user-service
-                                .route("user-service",
-                                                r -> r.path("/api/users/**",
-                                                                "/api/enseignants/**")
-                                                                .uri("http://localhost:8081"))
+    // ── Profil DOCKER ────────────────────────────────────────────────────────
+    @Bean
+    @Profile("docker")
+    public RouteLocator dockerRoutes(RouteLocatorBuilder builder) {
+        return buildRoutes(builder,
+                "http://user-service:8081",
+                "http://auth-service:8082",
+                "http://disponibilite-service:8083",
+                "http://salle-service:8084",
+                "http://coursclasse-service:8085",
+                "http://specialevent-service:8086",
+                "http://planning-service:8087"
+        );
+    }
 
-                                // DISPONIBILITE SERVICE
-                                .route("disponibilite-service",
-                                                r -> r.path("/api/disponibilites", "/api/disponibilites/**")
-                                                                .uri("http://localhost:8083"))
+    // ── Routes communes ──────────────────────────────────────────────────────
+    private RouteLocator buildRoutes(RouteLocatorBuilder builder,
+                                     String userServiceUrl,
+                                     String authServiceUrl,
+                                     String disponibiliteServiceUrl,
+                                     String salleServiceUrl,
+                                     String coursClasseServiceUrl,
+                                     String specialEventServiceUrl,
+                                     String planningServiceUrl) {
+        return builder.routes()
+                // AUTH SERVICE
+                .route("auth-service", r -> r
+                        .path("/api/auth/**")
+                        .uri(authServiceUrl))
 
-                                // SALLES SERVICE
-                                .route("salles-service",
-                                                r -> r.path("/api/salles/**", "/api/materiels/**",
-                                                                "/api/reservations/**")
-                                                                .uri("http://localhost:8084"))
+                // USER SERVICE
+                .route("user-service", r -> r
+                        .path("/api/users/**", "/api/enseignants/**")
+                        .uri(userServiceUrl))
 
-                                // COURS ET CLASSES SERVICE
-                                .route("coursclasseservice",
-                                                r -> r.path("/api/classes/**", "/api/cours/**", "/api/ecoles/**",
-                                                                "/api/etudiants/**", "/api/filieres/**",
-                                                                "/api/groupes-etudiants/**", "/api/ues/**","/api/import/**")
-                                                                .uri("http://localhost:8085"))
+                // DISPONIBILITE SERVICE
+                .route("disponibilite-service", r -> r
+                        .path("/api/disponibilites", "/api/disponibilites/**")
+                        .uri(disponibiliteServiceUrl))
 
-                                // Speciale Event SERVICE
-                                .route("SpecialEvent-service", r -> r.path("/api/demandes/**", "/api/events/**")
-                                                .uri("http://localhost:8086"))
-                                // PLANNING SERVICE (Edmonds-Karp)
-                                .route("planning-service", r -> r.path("/api/generation/**")
-                                                .uri("http://localhost:8087"))
+                // SALLES SERVICE
+                .route("salles-service", r -> r
+                        .path("/api/salles/**", "/api/materiels/**", "/api/reservations/**")
+                        .uri(salleServiceUrl))
 
-                                .build();
-        }
+                // COURS ET CLASSES SERVICE
+                .route("coursclasse-service", r -> r
+                        .path("/api/classes/**", "/api/cours/**", "/api/ecoles/**",
+                                "/api/etudiants/**", "/api/filieres/**",
+                                "/api/groupes-etudiants/**", "/api/ues/**", "/api/import/**")
+                        .uri(coursClasseServiceUrl))
+
+                // SPECIAL EVENT SERVICE
+                .route("specialevent-service", r -> r
+                        .path("/api/demandes/**", "/api/events/**")
+                        .uri(specialEventServiceUrl))
+
+                // PLANNING SERVICE
+                .route("planning-service", r -> r
+                        .path("/api/generation/**")
+                        .uri(planningServiceUrl))
+
+                .build();
+    }
 }

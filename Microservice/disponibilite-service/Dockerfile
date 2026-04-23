@@ -1,11 +1,11 @@
 # ── Stage 1 : Build ──────────────────────────────────────────────────────────
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
-COPY pom.xml ./
-RUN --mount=type=cache,target=/root/.m2 true
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -q
 COPY src ./src
-# Pas de wrapper mvnw dans ce service — on utilise Maven embarqué
-RUN apk add --no-cache maven && mvn package -DskipTests -q
+RUN ./mvnw package -DskipTests -q
 
 # ── Stage 2 : Runtime ─────────────────────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine

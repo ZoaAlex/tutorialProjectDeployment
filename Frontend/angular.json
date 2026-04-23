@@ -29,6 +29,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {"type": "initial", "maximumWarning": "500kB", "maximumError": "2MB"},
                 {"type": "anyComponentStyle", "maximumWarning": "4kB", "maximumError": "8kB"}
@@ -39,6 +45,14 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "docker": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.docker.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -47,7 +61,8 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {"buildTarget": "gestion-emploi-temps:build:production"},
-            "development": {"buildTarget": "gestion-emploi-temps:build:development"}
+            "development": {"buildTarget": "gestion-emploi-temps:build:development"},
+            "docker": {"buildTarget": "gestion-emploi-temps:build:docker"}
           },
           "defaultConfiguration": "development"
         }

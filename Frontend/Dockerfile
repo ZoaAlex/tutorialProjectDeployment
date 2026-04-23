@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --prefer-offline
 COPY . .
-RUN npm run build -- --configuration production
+# Build avec la configuration Docker
+RUN npx ng build --configuration=docker
 
 # ── Stage 2 : Serve avec nginx ────────────────────────────────────────────────
 FROM nginx:1.27-alpine

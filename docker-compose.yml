@@ -108,6 +108,8 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    ports:
+      - "8081:8081"
     networks:
       - backend
     healthcheck:
@@ -138,6 +140,8 @@ services:
       # Mail — remplacer par des secrets en prod
       SPRING_MAIL_HOST: smtp-relay.brevo.com
       SPRING_MAIL_PORT: 587
+    ports:
+      - "8082:8082"
     networks:
       - backend
 
@@ -168,6 +172,8 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8083:8083"
     networks:
       - backend
 
@@ -192,6 +198,8 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    ports:
+      - "8084:8084"
     networks:
       - backend
 
@@ -216,6 +224,8 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    ports:
+      - "8085:8085"
     networks:
       - backend
 
@@ -240,6 +250,8 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    ports:
+      - "8086:8086"
     networks:
       - backend
 
@@ -270,6 +282,8 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8087:8087"
     networks:
       - backend
 
@@ -286,6 +300,7 @@ services:
     environment:
       SERVER_PORT: 8080
       SPRING_APPLICATION_NAME: gateway
+      SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8760/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
     ports:
@@ -298,6 +313,8 @@ services:
   frontend:
     build:
       context: ./Frontend
+      args:
+        API_URL: http://gateway:8080/api  # Passe l'URL au build
       dockerfile: Dockerfile
     container_name: frontend
     restart: unless-stopped
