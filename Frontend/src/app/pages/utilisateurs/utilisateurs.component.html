@@ -16,7 +16,25 @@
             <option value="enseignant">Enseignant</option>
           </select>
         </div>
-        <div class="col-md-5 text-end">
+        <div class="col-md-5 text-end d-flex justify-content-end gap-2 align-items-center">
+          <!-- Feedback import -->
+          @if (importSuccess()) {
+            <span class="badge bg-success"><i class="fas fa-check me-1"></i>{{ importSuccess() }}</span>
+          }
+          @if (importError()) {
+            <span class="badge bg-danger" [title]="importError()"><i class="fas fa-exclamation-triangle me-1"></i>Erreur import</span>
+          }
+
+          <!-- Bouton import Excel -->
+          <label class="btn btn-outline-success mb-0" [class.disabled]="importLoading()">
+            @if (importLoading()) {
+              <span class="spinner-border spinner-border-sm me-1"></span>Import...
+            } @else {
+              <i class="fas fa-file-excel me-2"></i>Importer Excel
+            }
+            <input type="file" accept=".xlsx,.xls" class="d-none" (change)="onImportExcel($event)" [disabled]="importLoading()">
+          </label>
+
           <button class="btn btn-primary" (click)="openModal()"><i class="fas fa-plus me-2"></i>Nouvel utilisateur</button>
         </div>
       </div>

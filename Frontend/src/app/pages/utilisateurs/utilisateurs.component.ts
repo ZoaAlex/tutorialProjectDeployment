@@ -95,6 +95,35 @@ export class UtilisateursComponent {
     }
   }
 
+  importLoading = signal(false);
+  importSuccess = signal('');
+  importError   = signal('');
+
+  onImportExcel(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+
+    this.importLoading.set(true);
+    this.importSuccess.set('');
+    this.importError.set('');
+
+    this.userService.importUsers(file).subscribe({
+      next: (msg) => {
+        this.importSuccess.set(msg);
+        this.importLoading.set(false);
+        this.loadUsers();
+        setTimeout(() => this.importSuccess.set(''), 4000);
+      },
+      error: (err) => {
+        this.importError.set(err.error ?? 'Erreur lors de l\'import');
+        this.importLoading.set(false);
+        setTimeout(() => this.importError.set(''), 6000);
+      }
+    });
+  }
+
   updateUserStatus(id: number, user: User): void {
   // 1. Déterminer le nouveau statut
   const nouveauStatut = user.statut === 'ACTIF' ? 'INACTIF' : 'ACTIF';

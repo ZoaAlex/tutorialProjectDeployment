@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import iusjc_planning.planning_service.dto.ClasseResponse;
 import iusjc_planning.planning_service.dto.CoursClientDTO;
 import iusjc_planning.planning_service.dto.EnseignantResponse;
+import iusjc_planning.planning_service.dto.UpdateEmploiDuTempsRequest;
+import iusjc_planning.planning_service.exception.ResourceNotFoundException;
 import iusjc_planning.planning_service.feign.ClasseClient;
 import iusjc_planning.planning_service.feign.CoursClient;
 import iusjc_planning.planning_service.feign.UserClient;
@@ -114,6 +116,35 @@ public class PlanningService {
 
         log.info("Génération terminée avec {} placements enregistrés.", entites.size());
         return resultat;
+    }
+
+    /**
+     * Modifie manuellement un créneau d'emploi du temps existant.
+     */
+    @Transactional
+    public EmploiDuTemps updateEmploiDuTemps(Long id, UpdateEmploiDuTempsRequest request) {
+        EmploiDuTemps emploi = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Créneau introuvable avec l'id : " + id));
+
+        if (request.getJour() != null) emploi.setJour(request.getJour());
+        if (request.getHeureDebut() != null) emploi.setHeureDebut(LocalTime.parse(request.getHeureDebut().substring(0, 5)));
+        if (request.getHeureFin() != null) emploi.setHeureFin(LocalTime.parse(request.getHeureFin().substring(0, 5)));
+        if (request.getSalleId() != null) emploi.setSalleId(request.getSalleId());
+        if (request.getNomSalle() != null) emploi.setNomSalle(request.getNomSalle());
+        if (request.getEnseignantId() != null) emploi.setEnseignantId(request.getEnseignantId());
+
+        return repository.save(emploi);
+    }
+
+    /**
+     * Supprime un créneau d'emploi du temps.
+     */
+    @Transactional
+    public void deleteEmploiDuTemps(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Créneau introuvable avec l'id : " + id);
+        }
+        repository.deleteById(id);
     }
 
     /**

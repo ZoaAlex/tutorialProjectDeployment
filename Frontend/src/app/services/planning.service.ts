@@ -32,6 +32,28 @@ export interface CoursNonPlace {
     raison: string;
 }
 
+export interface UpdateEmploiDuTempsRequest {
+    jour?: string;
+    heureDebut?: string;
+    heureFin?: string;
+    salleId?: number;
+    nomSalle?: string;
+    enseignantId?: number;
+}
+
+export interface EmploiDuTempsEntry {
+    id: number;
+    coursId: number;
+    nomCours: string;
+    enseignantId: number;
+    classeId: number;
+    salleId: number;
+    nomSalle: string;
+    jour: string;
+    heureDebut: string;
+    heureFin: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PlanningService {
     private http = inject(HttpClient);
@@ -73,5 +95,19 @@ export class PlanningService {
     getEmploiDuTemps(classeId?: number): Observable<PlacementEffectue[]> {
         const params = classeId ? `?classeId=${classeId}` : '';
         return this.http.get<PlacementEffectue[]>(`${this.generationUrl}${params}`);
+    }
+
+    /**
+     * Modifie un créneau existant (jour, heure, salle, enseignant).
+     */
+    updateEmploiDuTemps(id: number, request: UpdateEmploiDuTempsRequest): Observable<EmploiDuTempsEntry> {
+        return this.http.put<EmploiDuTempsEntry>(`${this.generationUrl}/${id}`, request);
+    }
+
+    /**
+     * Supprime un créneau de l'emploi du temps.
+     */
+    deleteEmploiDuTemps(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.generationUrl}/${id}`);
     }
 }

@@ -1,0 +1,219 @@
+<app-sidebar></app-sidebar>
+<div class="main-content">
+  <app-navbar pageTitle="Éditeur Emploi du Temps"></app-navbar>
+  <div class="content-wrapper">
+
+    <!-- Sélecteur de classe -->
+    <div class="card mb-3">
+      <div class="card-body py-2">
+        <div class="row g-2 align-items-center">
+          <div class="col-auto">
+            <label class="form-label mb-0 fw-semibold">Classe</label>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select form-select-sm" (change)="onClasseChange($event)">
+              <option value="">-- Sélectionner une classe --</option>
+              @for (c of classes(); track c.id) {
+                <option [value]="c.id">{{ c.nom }} ({{ c.code }})</option>
+              }
+            </select>
+          </div>
+          @if (saving()) {
+            <div class="col-auto">
+              <span class="spinner-border spinner-border-sm text-primary me-1"></span>
+              <small class="text-muted">Enregistrement...</small>
+            </div>
+          }
+          @if (modifiesCount() > 0) {
+            <div class="col-auto">
+              <button class="btn btn-sm btn-success" (click)="enregistrerModifications()" [disabled]="saving()">
+                <i class="fas fa-save me-1"></i>Enregistrer
+                <span class="badge bg-white text-success ms-1 dirty-badge">{{ modifiesCount() }}</span>
+              </button>
+            </div>
+          }
+          @if (succes()) {
+            <div class="col-auto">
+              <span class="badge bg-success">{{ succes() }}</span>
+            </div>
+          }
+          @if (erreur()) {
+            <div class="col-auto">
+              <span class="badge bg-danger">{{ erreur() }}</span>
+            </div>
+          }        </div>
+      </div>
+    </div>
+
+    @if (!classeSelectionnee()) {
+      <div class="text-center text-muted py-5">
+        <i class="fas fa-chalkboard-teacher fa-3x mb-3 d-block"></i>
+        <p>Sélectionnez une classe pour éditer son emploi du temps.</p>
+      </div>
+    }
+
+    @if (classeSelectionnee()) {
+      <div class="editor-layout" [class.saving-overlay]="saving()">
+
+        <!-- Cours non placés -->
+        <div class="sidebar-cours">
+          <div class="card h-100">
+            <div class="card-header py-2">
+              <h6 class="mb-0 text-white" style="font-size:0.82rem">
+                <i class="fas fa-exclamation-circle me-1 text-warning"></i>
+                Cours non placés
+                <span class="badge bg-warning text-dark ms-1">{{ coursNonPlaces().length }}</span>
+              </h6>
+            </div>
+            <div class="card-body p-2" style="overflow-y:auto; max-height: 600px;">
+              @if (coursNonPlaces().length === 0) {
+                <p class="text-muted text-center small mt-3">Tous les cours sont placés.</p>
+              }
+              @for (c of coursNonPlaces(); track c.id) {
+                <div class="non-place-card"
+                     draggable="true"
+                     (dragstart)="onDragStartNonPlace(c)">
+                  <div class="np-nom">{{ c.nom }}</div>
+                  <div class="np-meta">
+                    <i class="fas fa-clock me-1"></i>{{ c.volumeHoraire }}h
+                    @if (c.enseignantId) {
+                      · {{ getNomEnseignant(c.enseignantId) }}
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Grille calendrier -->
+        <div class="calendrier-wrap">
+          <div class="card">
+            <div class="card-header py-2">
+              <h6 class="mb-0 text-white" style="font-size:0.82rem">
+                <i class="fas fa-calendar-alt me-2"></i>
+                {{ classeSelectionnee()!.nom }} — Glissez les cours sur la grille
+              </h6>
+            </div>
+            <div class="card-body p-2">
+              <table class="table-cal">
+                <thead>
+                  <tr>
+                    <th style="width:72px">Heure</th>
+                    @for (j of jours; track j) { <th>{{ j }}</th> }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (creneau of creneaux; track creneau.debut) {
+                    <tr>
+                      <td class="td-heure">
+                        {{ creneau.debut }}<br>
+                        <small>{{ creneau.fin }}</small>
+                      </td>
+                      @for (jour of jours; track jour) {
+                        <td>
+                          <div class="drop-zone"
+                               [class.drag-over]="dragOverCell() === cellKey(jour, creneau.debut)"
+                               (dragover)="onDragOver($event, jour, creneau.debut)"
+                               (dragleave)="onDragLeave()"
+                               (drop)="onDrop($event, jour, creneau.debut)">
+                            @for (p of getPlacementsCase(jour, creneau.debut); track p.coursId) {
+                              <div class="cours-card"
+                                   [class.dirty]="p.modifie"
+                                   draggable="true"
+                                   (dragstart)="onDragStartPlacement(p)">
+                                <button class="btn-edit" (click)="ouvrirModal(p)" title="Modifier">
+                                  <i class="fas fa-pen"></i>
+                                </button>
+                                <button class="btn-remove" (click)="supprimerPlacement(p)" title="Supprimer">
+                                  <i class="fas fa-times"></i>
+                                </button>
+                                <div class="cours-nom">{{ p.nomCours }}</div>
+                                <div class="cours-meta">
+                                  <i class="fas fa-user me-1"></i>{{ getNomEnseignant(p.enseignantId) }}
+                                </div>
+                                <div class="cours-meta">
+                                  <i class="fas fa-door-open me-1"></i>{{ p.nomSalle }}
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Modal modification créneau -->
+@if (showModal()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-edit me-2"></i>Modifier le créneau
+          </h5>
+          <button type="button" class="btn-close" (click)="fermerModal()"></button>
+        </div>
+        <div class="modal-body">
+          @if (modalPlacement()) {
+            <p class="fw-semibold mb-3">{{ modalPlacement()!.nomCours }}</p>
+          }
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Jour</label>
+              <select class="form-select" [(ngModel)]="modalJour" [ngModel]="modalJour()" (ngModelChange)="modalJour.set($event)">
+                @for (j of jours; track j) {
+                  <option [value]="j">{{ j }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Créneau</label>
+              <select class="form-select" [ngModel]="modalHeure()" (ngModelChange)="modalHeure.set($event)">
+                @for (c of creneaux; track c.debut) {
+                  <option [value]="c.debut">{{ c.debut }} – {{ c.fin }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Salle</label>
+              <select class="form-select" [ngModel]="modalSalleId()" (ngModelChange)="modalSalleId.set($event ? +$event : null)">
+                <option [value]="null">-- Inchangée --</option>
+                @for (s of salles(); track s.id) {
+                  <option [value]="s.id">{{ s.nom }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Enseignant</label>
+              <select class="form-select" [ngModel]="modalEnseignantId()" (ngModelChange)="modalEnseignantId.set($event ? +$event : null)">
+                <option [value]="null">-- Inchangé --</option>
+                @for (e of enseignants(); track e.id) {
+                  <option [value]="e.id">{{ e.prenom }} {{ e.nom }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="fermerModal()">Annuler</button>
+          <button class="btn btn-primary" (click)="sauvegarderModal()" [disabled]="saving()">
+            @if (saving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

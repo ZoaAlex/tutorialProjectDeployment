@@ -303,7 +303,12 @@
           Format Excel étudiants : <code>matricule | nom | prénom | sexe (M/F) | codeClasse</code>
         </small>
       </div>
-      <app-import-excel entityType="etudiant" (imported)="loadAll()"></app-import-excel>
+      <div class="d-flex gap-2">
+        <app-import-excel entityType="etudiant" (imported)="loadAll()"></app-import-excel>
+        <button class="btn btn-primary" (click)="openModalEntity('etudiant')">
+          <i class="fas fa-plus me-2"></i>Nouvel Étudiant
+        </button>
+      </div>
     </div>
   </div>
   <div class="card">
@@ -316,6 +321,7 @@
             <th>Prénom</th>
             <th>Sexe</th>
             <th>Classe</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -326,11 +332,19 @@
             <td>{{ e.prenom }}</td>
             <td>{{ e.sex }}</td>
             <td>{{ getClasseNom(e.classeId) }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="openModalEntity('etudiant', e)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteEtudiant(e.id!)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
           </tr>
           }
           @if (etudiants().length === 0) {
           <tr>
-            <td colspan="5" class="text-center text-muted py-4">
+            <td colspan="6" class="text-center text-muted py-4">
               <i class="fas fa-users fa-2x mb-2 d-block"></i>
               Aucun étudiant. Importez un fichier Excel pour commencer.
             </td>
@@ -352,7 +366,12 @@
           Format Excel groupes : <code>nom | description | effectif | codesClasses (séparés par virgule)</code>
         </small>
       </div>
-      <app-import-excel entityType="groupe" (imported)="loadAll()"></app-import-excel>
+      <div class="d-flex gap-2">
+        <app-import-excel entityType="groupe" (imported)="loadAll()"></app-import-excel>
+        <button class="btn btn-primary" (click)="openModalEntity('groupe')">
+          <i class="fas fa-plus me-2"></i>Nouveau Groupe
+        </button>
+      </div>
     </div>
   </div>
   <div class="card">
@@ -363,6 +382,7 @@
             <th>Nom</th>
             <th>Description</th>
             <th>Effectif</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -371,11 +391,22 @@
             <td><strong>{{ g.nom }}</strong></td>
             <td>{{ g.description }}</td>
             <td>{{ g.effectif }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-info me-1" title="Voir les étudiants" (click)="voirEtudiantsGroupe(g)">
+                <i class="fas fa-users"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="openModalEntity('groupe', g)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteGroupe(g.id!)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
           </tr>
           }
           @if (groupes().length === 0) {
           <tr>
-            <td colspan="3" class="text-center text-muted py-4">
+            <td colspan="4" class="text-center text-muted py-4">
               <i class="fas fa-layer-group fa-2x mb-2 d-block"></i>
               Aucun groupe. Importez un fichier Excel pour commencer.
             </td>
@@ -584,6 +615,130 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeModalEntity('filiere')">Annuler</button>
         <button type="button" class="btn btn-primary" (click)="saveFiliere()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Étudiant -->
+@if (showModalEtudiant()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouvel' }} étudiant</h5>
+        <button type="button" class="btn-close" (click)="closeModalEntity('etudiant')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Matricule</label>
+          <input type="text" class="form-control" [(ngModel)]="currentEtudiant().matricule">
+        </div>
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label">Nom</label>
+            <input type="text" class="form-control" [(ngModel)]="currentEtudiant().nom">
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label">Prénom</label>
+            <input type="text" class="form-control" [(ngModel)]="currentEtudiant().prenom">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Sexe</label>
+          <select class="form-select" [(ngModel)]="currentEtudiant().sex">
+            <option value="MASCULINE">Masculin</option>
+            <option value="FEMININE">Féminin</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Classe</label>
+          <select class="form-select" [(ngModel)]="currentEtudiant().classeId">
+            <option [value]="0">Choisir une classe</option>
+            @for (cl of classes(); track cl.id) {
+            <option [value]="cl.id">{{ cl.nom }} ({{ cl.code }})</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModalEntity('etudiant')">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveEtudiant()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Groupe -->
+@if (showModalGroupe()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editMode() ? 'Modifier' : 'Nouveau' }} groupe</h5>
+        <button type="button" class="btn-close" (click)="closeModalEntity('groupe')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nom</label>
+          <input type="text" class="form-control" [(ngModel)]="currentGroupe().nom">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" [(ngModel)]="currentGroupe().description" rows="2"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Effectif</label>
+          <input type="number" class="form-control" [(ngModel)]="currentGroupe().effectif">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModalEntity('groupe')">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="saveGroupe()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Étudiants du groupe -->
+@if (showModalEtudiantsGroupe()) {
+<div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-users me-2"></i>Étudiants — {{ groupeSelectionne()?.nom }}
+        </h5>
+        <button type="button" class="btn-close" (click)="showModalEtudiantsGroupe.set(false)"></button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Sexe</th><th>Classe</th></tr>
+          </thead>
+          <tbody>
+            @for (e of etudiantsDuGroupe(); track e.id) {
+            <tr>
+              <td><code>{{ e.matricule }}</code></td>
+              <td>{{ e.nom }}</td>
+              <td>{{ e.prenom }}</td>
+              <td>{{ e.sex }}</td>
+              <td>{{ getClasseNom(e.classeId) }}</td>
+            </tr>
+            }
+            @if (etudiantsDuGroupe().length === 0) {
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">Aucun étudiant dans ce groupe.</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showModalEtudiantsGroupe.set(false)">Fermer</button>
       </div>
     </div>
   </div>

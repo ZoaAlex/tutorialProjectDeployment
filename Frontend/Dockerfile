@@ -2,10 +2,10 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --prefer-offline
+RUN npm install --prefer-offline
 COPY . .
 # Build avec la configuration Docker
-RUN npx ng build --configuration=docker
+RUN npm run build -- --configuration=docker
 
 # ── Stage 2 : Serve avec nginx ────────────────────────────────────────────────
 FROM nginx:1.27-alpine

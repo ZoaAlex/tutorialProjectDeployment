@@ -29,6 +29,12 @@ export class UserService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
+    importUsers(file: File): Observable<string> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post(`${this.apiUrl}/import`, formData, { responseType: 'text' });
+    }
+
     getEnseignants(): Observable<User[]> {
         // Fetch all users and filter by role 'ROLE_ENSEIGNANT'
         // Ideally backend should provide /users/role/ROLE_ENSEIGNANT

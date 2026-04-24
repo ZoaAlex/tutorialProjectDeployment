@@ -47,5 +47,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/generation/generation.component').then(m => m.GenerationComponent),
     canActivate: [authGuard, adminGuard]
   },
+  {
+    path: 'emploi-du-temps',
+    loadComponent: () => import('./pages/emploi-du-temps-editor/emploi-du-temps-editor.component').then(m => m.EmploiDuTempsEditorComponent),
+    canActivate: [authGuard, adminGuard]
+  },
   { path: '**', redirectTo: '/dashboard' }
 ];

@@ -54,6 +54,11 @@ export class CoursComponent implements OnInit {
   showModalEcole = signal(false);
   showModalUe = signal(false);
   showModalFiliere = signal(false);
+  showModalEtudiant = signal(false);
+  showModalGroupe = signal(false);
+  showModalEtudiantsGroupe = signal(false);
+  groupeSelectionne = signal<GroupeEtudiant | null>(null);
+  etudiantsDuGroupe = signal<Etudiant[]>([]);
 
   editMode = signal(false);
   activeTab = signal('cours');
@@ -100,6 +105,8 @@ export class CoursComponent implements OnInit {
   currentEcole = signal<Ecole>(this.getEmptyEcole());
   currentUe = signal<Ue>(this.getEmptyUe());
   currentFiliere = signal<Filiere>(this.getEmptyFiliere());
+  currentEtudiant = signal<Etudiant>(this.getEmptyEtudiant());
+  currentGroupe = signal<GroupeEtudiant>(this.getEmptyGroupe());
 
   ngOnInit() {
     this.loadAll();
@@ -160,6 +167,14 @@ export class CoursComponent implements OnInit {
     return { id: 0, nom: '', code: '', ecoleId: 0, classes: [] };
   }
 
+  getEmptyEtudiant(): Etudiant {
+    return { matricule: '', nom: '', prenom: '', sex: 'MASCULINE' as any, classeId: 0, ecoleId: 0 };
+  }
+
+  getEmptyGroupe(): GroupeEtudiant {
+    return { nom: '', description: '', effectif: 0 };
+  }
+
   openModal(cours?: Cours): void {
     this.editMode.set(!!cours);
     this.currentCours.set(cours ? { ...cours } : this.getEmptyCours());
@@ -202,7 +217,7 @@ export class CoursComponent implements OnInit {
   }
 
   // Generic Modal Logic (Simplified for readability)
-  openModalEntity(type: 'classe' | 'ecole' | 'ue' | 'filiere', item?: any): void {
+  openModalEntity(type: 'classe' | 'ecole' | 'ue' | 'filiere' | 'etudiant' | 'groupe', item?: any): void {
     this.editMode.set(!!item);
     if (type === 'classe') {
       this.currentClasse.set(item ? { ...item } : this.getEmptyClasse());
@@ -216,6 +231,12 @@ export class CoursComponent implements OnInit {
     } else if (type === 'filiere') {
       this.currentFiliere.set(item ? { ...item } : this.getEmptyFiliere());
       this.showModalFiliere.set(true);
+    } else if (type === 'etudiant') {
+      this.currentEtudiant.set(item ? { ...item } : this.getEmptyEtudiant());
+      this.showModalEtudiant.set(true);
+    } else if (type === 'groupe') {
+      this.currentGroupe.set(item ? { ...item } : this.getEmptyGroupe());
+      this.showModalGroupe.set(true);
     }
   }
 
@@ -224,6 +245,8 @@ export class CoursComponent implements OnInit {
     else if (type === 'ecole') this.showModalEcole.set(false);
     else if (type === 'ue') this.showModalUe.set(false);
     else if (type === 'filiere') this.showModalFiliere.set(false);
+    else if (type === 'etudiant') this.showModalEtudiant.set(false);
+    else if (type === 'groupe') this.showModalGroupe.set(false);
   }
 
   saveClasse(): void {
@@ -308,5 +331,54 @@ export class CoursComponent implements OnInit {
         }
       });
     }
+  }
+
+  saveEtudiant(): void {
+    const item = this.currentEtudiant();
+    if (this.editMode()) {
+      this.coursClasseService.updateEtudiant(item.id!, item).subscribe(() => { this.loadAll(); this.closeModalEntity('etudiant'); });
+    } else {
+      this.coursClasseService.createEtudiant(item).subscribe(() => { this.loadAll(); this.closeModalEntity('etudiant'); });
+    }
+  }
+
+  deleteEtudiant(id: number): void {
+    if (confirm('Supprimer cet étudiant?')) {
+      this.coursClasseService.deleteEtudiant(id).subscribe({
+        next: () => this.loadAll(),
+        error: (err) => {
+          console.error('Erreur suppression étudiant', err);
+          alert('Impossible de supprimer l\'étudiant.');
+        }
+      });
+    }
+  }
+
+  saveGroupe(): void {
+    const item = this.currentGroupe();
+    if (this.editMode()) {
+      this.coursClasseService.updateGroupe(item.id!, item).subscribe(() => { this.loadAll(); this.closeModalEntity('groupe'); });
+    } else {
+      this.coursClasseService.createGroupe(item).subscribe(() => { this.loadAll(); this.closeModalEntity('groupe'); });
+    }
+  }
+
+  deleteGroupe(id: number): void {
+    if (confirm('Supprimer ce groupe?')) {
+      this.coursClasseService.deleteGroupe(id).subscribe({
+        next: () => this.loadAll(),
+        error: (err) => {
+          console.error('Erreur suppression groupe', err);
+          alert('Impossible de supprimer le groupe.');
+        }
+      });
+    }
+  }
+
+  voirEtudiantsGroupe(groupe: GroupeEtudiant): void {
+    this.groupeSelectionne.set(groupe);
+    const ids: number[] = (groupe as any).etudiantIds ?? [];
+    this.etudiantsDuGroupe.set(this.etudiants().filter(e => ids.includes(e.id!)));
+    this.showModalEtudiantsGroupe.set(true);
   }
 }
