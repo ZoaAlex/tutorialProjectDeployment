@@ -1,10 +1,10 @@
 package org.example.coursclasseservice.mapper;
 
+import java.util.Objects;
+
 import org.example.coursclasseservice.dto.CoursDto;
 import org.example.coursclasseservice.model.Cours;
 import org.example.coursclasseservice.model.Ue;
-
-import java.util.Objects;
 
 /**
  * Mapper pour Cours <-> CoursDto.
@@ -58,12 +58,12 @@ public class CoursMapper {
         if (dto == null) return null;
         Cours entity = new Cours();
         entity.setId(dto.id());
-        entity.setStatutCours(dto.statutCours());
+        entity.setStatutCours(dto.statutCours() != null ? dto.statutCours() : org.example.coursclasseservice.model.Enumeration.StatutCours.en_attente);
         entity.setNbreheurefait(dto.nbreheurefait());
         entity.setVolumeHoraire(dto.volumeHoraire());
         entity.setCodeSalle(dto.codeClasse());
         entity.setUe(ue);
-        entity.setEnseignantemail(dto.enseignantEmail() );
+        entity.setEnseignantemail(dto.enseignantEmail());
         entity.setNom(dto.nom());
         return entity;
     }

@@ -80,13 +80,15 @@
 
       }
 
-      @if (authService.isEnseignant()) {
+      @if (authService.isEnseignant() || authService.isAdmin()) {
       <li class="nav-item">
         <a class="nav-link" routerLink="/disponibilites/enseignant" routerLinkActive="active">
           <i class="fas fa-clock"></i>
           <span>Mes Disponibilités</span>
         </a>
       </li>
+      }
+      @if (authService.isEnseignant()) {
       <li class="nav-item">
         <a class="nav-link" routerLink="/demandes/enseignant" routerLinkActive="active">
           <i class="fas fa-calendar-plus"></i>

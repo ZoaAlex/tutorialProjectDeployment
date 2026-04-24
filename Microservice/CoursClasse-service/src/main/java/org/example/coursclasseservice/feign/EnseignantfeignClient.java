@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
         name = "user-service",
-        url="http://localhost:8081"
+        url = "${services.user.url:http://user-service:8081}"
 )
 public interface EnseignantfeignClient {
 
     @GetMapping("/api/users/exists")
     boolean existEmail(@RequestParam String email);
-
 
 }

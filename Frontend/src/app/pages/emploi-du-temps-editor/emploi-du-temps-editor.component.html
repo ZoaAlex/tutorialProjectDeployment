@@ -76,8 +76,8 @@
                   <div class="np-nom">{{ c.nom }}</div>
                   <div class="np-meta">
                     <i class="fas fa-clock me-1"></i>{{ c.volumeHoraire }}h
-                    @if (c.enseignantId) {
-                      · {{ getNomEnseignant(c.enseignantId) }}
+                    @if (c.enseignantEmail) {
+                      · {{ c.enseignantEmail }}
                     }
                   </div>
                 </div>

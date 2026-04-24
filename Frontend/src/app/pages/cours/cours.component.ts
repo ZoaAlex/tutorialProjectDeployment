@@ -138,16 +138,16 @@ export class CoursComponent implements OnInit {
 
   getEmptyCours(): Cours {
     return {
-      nom: "",
+      nom: '',
       id: 0,
-      statutCours: StatutCours.ACTIF,
-      type: StatutCours.ACTIF,
+      statutCours: StatutCours.EN_ATTENTE,
       classeId: 0,
+      codeClasse: '',
       ueId: 0,
       nbreheurefait: 0,
       volumeHoraire: 0,
-      enseignantId: undefined,
-      codeClasse: ''
+      enseignantEmail: '',
+      effectifClasse: 0
     };
   }
 

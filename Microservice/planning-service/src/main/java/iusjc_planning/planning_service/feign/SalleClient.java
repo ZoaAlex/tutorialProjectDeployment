@@ -1,16 +1,17 @@
 package iusjc_planning.planning_service.feign;
 
-import iusjc_planning.planning_service.dto.SalleClientDTO;
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
+import iusjc_planning.planning_service.dto.SalleClientDTO;
 
 /**
  * Client Feign vers salles-service.
  * Récupère les salles disponibles pour la génération.
  */
-@FeignClient(name = "salles-service", url = "http://localhost:8084")
+@FeignClient(name = "salles-service", url = "${services.salle.url:http://salle-service:8084}")
 public interface SalleClient {
 
     /**

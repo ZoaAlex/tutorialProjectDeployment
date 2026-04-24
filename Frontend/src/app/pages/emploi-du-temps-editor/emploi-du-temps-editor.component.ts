@@ -202,7 +202,7 @@ export class EmploiDuTempsEditorComponent implements OnInit {
     const nouveau: PlacementAvecId = {
       coursId: cours.id,
       nomCours: cours.nom,
-      enseignantId: cours.enseignantId ?? 0,
+      enseignantId: 0,
       classeId: cours.classeId ?? this.classeSelectionnee()!.id!,
       salleId: salle.id!,
       nomSalle: salle.nom,

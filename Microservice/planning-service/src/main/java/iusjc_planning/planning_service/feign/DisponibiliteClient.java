@@ -1,13 +1,14 @@
 package iusjc_planning.planning_service.feign;
 
-import iusjc_planning.planning_service.dto.DisponibiliteEnseignantDTO;
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
+import iusjc_planning.planning_service.dto.DisponibiliteEnseignantDTO;
 
-@FeignClient(name = "disponibilite-service",url = "http://localhost:8083")
+@FeignClient(name = "disponibilite-service", url = "${services.disponibilite.url:http://disponibilite-service:8083}")
 public interface DisponibiliteClient {
 
     @GetMapping("/api/disponibilites/enseignant/{enseignantId}/actives")

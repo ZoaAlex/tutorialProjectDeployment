@@ -7,25 +7,20 @@ export enum TypeCours {
 }
 
 export enum StatutCours {
-  ACTIF = 'ACTIF',
-  SUSPENDU = 'SUSPENDU',
-  ANNULE = 'ANNULE',
-  REPORTE = 'REPORTE',
-  TERMINE = 'TERMINE'
+  PLACE = 'place',
+  EN_ATTENTE = 'en_attente'
 }
 
 export interface Cours {
   id: number;
   nom: string;
-  /** Aligné sur le champ "statutCours" du backend */
   statutCours: StatutCours;
-  /** Alias conservé pour compatibilité avec les templates existants */
   type?: StatutCours;
   classeId?: number;
+  codeClasse?: string;
   ueId?: number;
   volumeHoraire: number;
   nbreheurefait: number;
-  enseignantId?: number;
-  codeClasse?: string;
+  enseignantEmail?: string;
   effectifClasse?: number;
 }

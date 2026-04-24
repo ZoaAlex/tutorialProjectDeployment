@@ -1,5 +1,9 @@
 package org.example.coursclasseservice.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -21,10 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CoursService {
@@ -49,8 +49,8 @@ public class CoursService {
             ue = ueRepository.findById(coursDto.ueId())
                     .orElseThrow(() -> new ResourceNotFoundException("Ue not found with id: " + coursDto.ueId()));
         }
-        // Validation enseignant : ignoree si user-service indisponible
-        if (coursDto.enseignantEmail() != null) {
+        // Validation enseignant : ignoree si email vide ou user-service indisponible
+        if (coursDto.enseignantEmail() != null && !coursDto.enseignantEmail().isBlank()) {
             try {
                 if (!enseignantfeignClient.existEmail(coursDto.enseignantEmail())) {
                     throw new ResourceNotFoundException("Enseignant not found with Email: " + coursDto.enseignantEmail());
@@ -141,18 +141,29 @@ public class CoursService {
 
 
 
-    private Cours mapRowToCours(Row row){
+    private Cours mapRowToCours(Row row) {
         String nom = row.getCell(0).getStringCellValue();
         String ueCode = row.getCell(1).getStringCellValue();
         int volumeHoraire = (int) row.getCell(2).getNumericCellValue();
         int nbreheurefait = (int) row.getCell(3).getNumericCellValue();
-        String enseignantEmail= row.getCell(4).getStringCellValue();
+        String enseignantEmail = row.getCell(4).getStringCellValue();
 
         Ue ue = ueRepository.findByCodeUe(ueCode)
                 .orElseThrow(() -> new RuntimeException("UE non trouvée avec le code : " + ueCode));
-        if (!enseignantfeignClient.existEmail(enseignantEmail)) {
-            throw new ResourceNotFoundException("Enseignant not found with Email: " + enseignantEmail);
+
+        // Validation email : ignorée si user-service indisponible
+        if (enseignantEmail != null && !enseignantEmail.isBlank()) {
+            try {
+                if (!enseignantfeignClient.existEmail(enseignantEmail)) {
+                    throw new ResourceNotFoundException("Enseignant non trouvé avec l'email : " + enseignantEmail);
+                }
+            } catch (ResourceNotFoundException e) {
+                throw e;
+            } catch (Exception e) {
+                log.warn("user-service indisponible lors de l'import, validation email ignorée : {}", e.getMessage());
+            }
         }
+
         Cours cours = new Cours();
         cours.setNom(nom);
         cours.setUe(ue);
@@ -160,7 +171,6 @@ public class CoursService {
         cours.setNbreheurefait(nbreheurefait);
         cours.setEnseignantemail(enseignantEmail);
         cours.setStatutCours(StatutCours.en_attente);
-
         return cours;
     }
 

@@ -1,13 +1,14 @@
 package iusjc_planning.planning_service.feign;
 
-import iusjc_planning.planning_service.dto.ClasseResponse;
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
+import iusjc_planning.planning_service.dto.ClasseResponse;
 
-@FeignClient(name = "coursclasse-service", url = "http://localhost:8085")
+@FeignClient(name = "coursclasse-service-classes", url = "${services.coursclasse.url:http://coursclasse-service:8085}")
 public interface ClasseClient {
 
     @GetMapping("/api/classes")
